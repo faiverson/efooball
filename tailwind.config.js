@@ -37,4 +37,9 @@ module.exports = {
         },
     },
     plugins: [require('@tailwindcss/forms')],
+    important: '#root',
+    corePlugins: {
+      // Remove Tailwind CSS's preflight style so it can use the MUI's preflight instead (CssBaseline).
+      preflight: false,
+    },
 }

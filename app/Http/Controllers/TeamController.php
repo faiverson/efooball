@@ -8,17 +8,19 @@ use App\Models\Team;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class TeamController extends Controller
 {
     public function stats(Request $request)
     {
       $args = (object) [
-        'version' => empty($request->version) ? GameVersion::TOTAL : GameVersion::getValue($request->version),
+        'versions' => empty($request->versions) ? GameVersion::getValues() : array_map(fn($item) => GameVersion::getValue($item), explode(',', $request->versions)),
         'start_at' => $request->start_at ?? '2018-03-27',
         'end_at' => $request->end_at ?? now()->toDateString(),
         'min_amount' => $request->min_amount ?? 10
       ];
+
       $team_table = (new Team())->getTable();
       $game_table = (new Game())->getTable();
 
@@ -46,10 +48,7 @@ class TeamController extends Controller
              ->orOn('g.team_away_id', '=', "$team_table.id");
       });
 
-      if($args->version != GameVersion::TOTAL) {
-          $query->where('g.version', '=', $args->version);
-      }
-
+      $query->whereIn('g.version',  $args->versions);
       $query->whereBetween('g.created_at', [$args->start_at, $args->end_at]);
 
       $query->groupBy(["$team_table.name", "$team_table.id"]);

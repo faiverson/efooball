@@ -6,7 +6,6 @@ use BenSampo\Enum\Enum;
 
 final class GameVersion extends Enum
 {
-    public const TOTAL = 'total';
     public const PES_2018 = 'pes_2018';
     public const PES_2019 = 'pes_2019';
     public const PES_2020 = 'pes_2020';
