@@ -9,7 +9,11 @@ export default function GameVersionTags({versions, onChange}) {
         {
           versions.map( item => {
             const {name, active} = item;
-            return <FormControlLabel key={name} control={<Checkbox checked={active}  />} label={name.replace('_', ' ')} onClick={ev =>{
+            return <FormControlLabel key={name} control={<Checkbox color="secondary" sx={{
+              '&.MuiCheckbox-colorSecondary .MuiSvgIcon-root': {
+                color: '#B3A200',
+              },
+            }}  checked={active} />} label={name.replace('_', ' ')} onClick={ev =>{
               ev.preventDefault()
               onChange(name)
             }} />

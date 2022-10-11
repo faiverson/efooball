@@ -27,17 +27,17 @@ module.exports = {
             "black": "var(--black)",
           },
           fontFamily: {
-              sans: ['Nunito', ...defaultTheme.fontFamily.sans],
+              nunito: ['Nunito', ...defaultTheme.fontFamily.sans],
           },
         },
     },
+    important: '#__next',
     variants: {
         extend: {
             opacity: ['disabled'],
         },
     },
     plugins: [require('@tailwindcss/forms')],
-    important: '#root',
     corePlugins: {
       // Remove Tailwind CSS's preflight style so it can use the MUI's preflight instead (CssBaseline).
       preflight: false,
