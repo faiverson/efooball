@@ -1,16 +1,16 @@
 import {useState} from "react"
 import Head from 'next/head'
-import { DatePicker } from '@mui/x-date-pickers/DatePicker'
-import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker'
-import { TextField, Button, FormLabel } from '@mui/material'
+import { Input, Button } from "@material-tailwind/react";
 import { useAuth } from '@/hooks/auth'
 import axios from '@/lib/axios'
+import {DateTime} from 'luxon';
 import {GameVersion} from '@/lib/enums'
 import Logo from 'components/Logo'
 import GameVersionTags from "@/components/GameVersionTags"
 
 function Home({teams}) {
-    // const { user } = useAuth({ middleware: 'guest' })
+
+  // const { user } = useAuth({ middleware: 'guest' })
   const [stats, setStats] = useState(teams)
   const [versions, setVersions] = useState(Object.keys(GameVersion).map(item => ({active: false, name: item})))
   const [minGames, setMinGames] = useState('')
@@ -29,7 +29,9 @@ function Home({teams}) {
     setMinGames(ev.target.value)
   }
 
-  const handleChange = (field, date) => {
+  const handleChange = (ev, field) => {
+    ev.preventDefault()
+    const date = DateTime.fromFormat(ev.target.value, 'yyyy-MM-dd');
     if(field === 'from_at') {
       setFromAt(date)
     } else if(field === 'until_at') {
@@ -45,11 +47,11 @@ function Home({teams}) {
     }
 
     if(!!from_at) {
-      filters += `&start_at=${from_at.toFormat('dd-MM-yyyy')}`;
+      filters += `&start_at=${from_at.toFormat('yyyy-MM-dd')}`;
     }
 
     if(!!until_at) {
-      filters += `&end_at=${until_at.toFormat('dd-MM-yyyy')}`;
+      filters += `&end_at=${until_at.toFormat('yyyy-MM-dd')}`;
     }
 
     const response = await axios.create({
@@ -70,62 +72,52 @@ function Home({teams}) {
     setStats(response?.data)
   }
 
+  console.log(stats)
+
   return (
     <>
         <Head>
             <title>Martes de Play</title>
         </Head>
         <div className="flex flex-col items-top">
-          <header className="flex justify-center pt-8 pb-4">
+          <header className="flex justify-center pt-4 pb-2 md:pt-8 md:pb-4">
             <Logo />
           </header>
-          <div className="grid grid-flow-col">
-            <div className="flex flex-col gap-2 px-4">
-                <FormLabel component="legend" color="secondary">Filtros:</FormLabel>
+          <div className="flex flex-col md:flex-row md:justify-between p-2 md:p-8">
+            <div className="flex flex-col gap-2 px-4 md:w-80 ">
+              <div>Filtros</div>
                 <GameVersionTags versions={versions} onChange={onChangeTag} />
-                <TextField type={"number"} color="secondary" variant="filled" label="Partidos Jugados" onChange={ev => onChangeMinGames(ev)} />
-                <DesktopDatePicker
-                  mask="__/__/____"
-                  label="Fecha desde"
-                  inputFormat="dd/MM/yyyy"
-                  value={from_at ? from_at.toLocaleString() : null}
-                  onChange={val => handleChange('from_at', val)}
-                  renderInput={(params) => <TextField color="secondary" variant="filled"  {...params} />} />
-                <DesktopDatePicker
-                  mask="__/__/____"
-                  label="Fecha hasta"
-                  inputFormat="dd/MM/yyyy"
-                  value={until_at ? until_at.toLocaleString() : null}
-                  onChange={val => handleChange('until_at', val)}
-                  renderInput={(params) => <TextField {...params} />} />
-                <Button onClick={send} variant="contained" color="secondary">Filtrar</Button>
+                <Input type={"number"} color="yellow" variant="outlined" label="Partidos Jugados" value={minGames} onChange={ev => onChangeMinGames(ev)} />
+                <Input type={"date"} color="yellow" variant="outlined" label="Fecha desde" value={from_at ? from_at.toFormat('yyyy-MM-dd') : ''} onChange={ev => handleChange(ev, 'from_at')} />
+                <Input type={"date"} color="yellow" variant="outlined" label="Fecha hasta" value={until_at ? until_at.toFormat('yyyy-MM-dd') : ''} onChange={ev => handleChange(ev, 'until_at')} />
+                <Button onClick={send} variant="filled" color="yellow">Filtrar</Button>
               </div>
-            {/*<div className="">*/}
-            {/*  <table className="table pes-table">*/}
-            {/*    <thead>*/}
-            {/*    <tr>*/}
-            {/*      <th>Equipos</th>*/}
-            {/*      <th>Porcentaje</th>*/}
-            {/*      <th>Record</th>*/}
-            {/*    </tr>*/}
-            {/*    </thead>*/}
-            {/*    <tbody>*/}
-            {/*    {*/}
-            {/*      stats.map((item, i) => {*/}
-            {/*        const {name, win, draw, lost, average} = item*/}
-            {/*        const record = `${win}-${draw}-${lost}`*/}
-            {/*        return (*/}
-            {/*          <tr key={i}>*/}
-            {/*            <td>{name}</td>*/}
-            {/*            <td>{average}%</td>*/}
-            {/*            <td>{record}</td>*/}
-            {/*          </tr>*/}
-            {/*        )*/}
-            {/*      })*/}
-            {/*    }*/}
-            {/*    </tbody>*/}
-            {/*  </table>*/}
-            {/*</div>*/}
+            <div className="">
+              <table className="table pes-table">
+                <thead>
+                <tr>
+                  <th>Equipos</th>
+                  <th>Porcentaje</th>
+                  <th>Record</th>
+                </tr>
+                </thead>
+                <tbody>
+                {
+                  stats.map((item, i) => {
+                    const {name, win, draw, lost, average} = item
+                    const record = `${win}-${draw}-${lost}`
+                    return (
+                      <tr key={i}>
+                        <td>{name}</td>
+                        <td>{average}%</td>
+                        <td>{record}</td>
+                      </tr>
+                    )
+                  })
+                }
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
     </>

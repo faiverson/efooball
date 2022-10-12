@@ -1,6 +1,4 @@
 @tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 :root {
   --blue-light: #02027D;
@@ -18,8 +16,6 @@
   --orange-alternative: #DB7E00;
   --orange-dark-alternative: #884E00;
   --orange-dark: #533000;
-  --white: #fff;
-  --black: #000;
   --xl: 1280px;
 }
 
@@ -36,7 +32,7 @@
   body {
     font-family: "eFootball Sans", sans-serif;
     background-color: theme('colors.blue-dark');
-    color: theme('colors.yellow');
+    color: theme('colors.main-yellow');
   }
 
   .container {
@@ -48,7 +44,7 @@
   }
 
   .background-primary {
-    background-color: theme('colors.blue');
+    background-color: theme('colors.main-blue');
   }
 
   .background-dark {
@@ -85,18 +81,8 @@
     border-bottom: 3px solid var(--yellow-alternative);
     font-size: 14px;
   }
-
-  .button {
-    font-size: 0.875rem;
-    padding: 12px 24px;
-    border-radius: 8px;
-    color: white;
-    transition: all 150ms ease;
-    cursor: pointer;
-    border: none;
-  }
-
-  [type='text']:focus, [type='email']:focus, [type='url']:focus, [type='password']:focus, [type='number']:focus, [type='date']:focus, [type='datetime-local']:focus, [type='month']:focus, [type='search']:focus, [type='tel']:focus, [type='time']:focus, [type='week']:focus, [multiple]:focus, textarea:focus, select:focus {
-    box-shadow: none;
-  }
 }
+
+@tailwind components;
+
+@tailwind utilities;

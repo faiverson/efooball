@@ -8,7 +8,6 @@ use App\Models\Team;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class TeamController extends Controller
 {

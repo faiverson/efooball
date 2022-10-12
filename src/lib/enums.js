@@ -5,4 +5,5 @@ export const GameVersion = {
   'PES_2021': 'pes_2021',
   'FIFA_2022': 'fifa_2022',
   'EFOOTBALL_2022': 'efootball_2022',
+  'EFOOTBALL_2023': 'efootball_2023',
 };

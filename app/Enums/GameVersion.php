@@ -12,4 +12,5 @@ final class GameVersion extends Enum
     public const PES_2021 = 'pes_2021';
     public const FIFA_2022 = 'fifa_2022';
     public const EFOOTBALL_2022 = 'efootball_2022';
+    public const EFOOTBALL_2023 = 'efootball_2023';
 }

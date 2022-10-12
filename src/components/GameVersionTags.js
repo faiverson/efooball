@@ -1,26 +1,34 @@
-import Checkbox from '@mui/material/Checkbox';
-import FormGroup from '@mui/material/FormGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
+import {useState, useEffect} from "react"
+import { Checkbox } from "@material-tailwind/react";
+
+function VersionTag({name, status, onChange}) {
+  const [tag, setTag] = useState(status)
+  const change = (ev, name) => {
+    ev.preventDefault()
+    onChange(name)
+  }
+
+  useEffect(() => {
+    setTag(status)
+  }, [status])
+
+  return (
+    <div className="flex items-center">
+      <Checkbox color="yellow" onChange={ev => change(ev, name)} checked={tag} id={`tag-${name}`} />
+      <label htmlFor={`tag-${name}`}>{name.replace('_', ' ')}</label>
+    </div>
+  )
+}
 
 export default function GameVersionTags({versions, onChange}) {
   return (
-    <>
-      <FormGroup>
+    <div>
         {
           versions.map( item => {
             const {name, active} = item;
-            return <FormControlLabel key={name} control={<Checkbox color="secondary" sx={{
-              '&.MuiCheckbox-colorSecondary .MuiSvgIcon-root': {
-                color: '#B3A200',
-              },
-            }}  checked={active} />} label={name.replace('_', ' ')} onClick={ev =>{
-              ev.preventDefault()
-              onChange(name)
-            }} />
+            return <VersionTag key={name} status={active} name={name} onChange={onChange} />
           })
         }
-      </FormGroup>
-
-    </>
+    </div>
   )
 }
