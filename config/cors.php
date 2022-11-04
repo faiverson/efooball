@@ -1,17 +1,5 @@
 <?php
 
-$frontedUrl = env('FRONTEND_URL', '*');
-
-if ($frontedUrl !== '*') {
-  $parsed = parse_url($frontedUrl);
-  $frontedUrl = sprintf(
-    '%s://%s%s',
-    $parsed['scheme'],
-    $parsed['host'],
-    isset($parsed['port']) ? ':' . $parsed['port'] : ''
-  );
-}
-
 return [
 
     /*
@@ -26,12 +14,12 @@ return [
     | To learn more: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
     |
     */
-    'paths' => ['*'],
+
+    'paths' => ['api/*', 'sanctum/csrf-cookie'],
 
     'allowed_methods' => ['*'],
 
-//    'allowed_origins' => [env('FRONTEND_URL', 'http://localhost:8050')],
-  'allowed_origins' => ['*'],
+    'allowed_origins' => ['*'],
 
     'allowed_origins_patterns' => [],
 
@@ -41,6 +29,6 @@ return [
 
     'max_age' => 0,
 
-    'supports_credentials' => true,
+    'supports_credentials' => false,
 
 ];

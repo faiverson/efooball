@@ -2,18 +2,14 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use App\Models\Player;
+use App\Models\Team;
 
 class TeamsSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
     public function run()
     {
         Schema::disableForeignKeyConstraints();
@@ -66,14 +62,14 @@ class TeamsSeeder extends Seeder
                 'name' => 'Miguel'
             ]
         ];
-        \App\Models\Player::insert($players);
-        $players = \App\Models\Player::orderBy('name')->get();
-        $rest = \App\Models\Player::where('id', '<>', 1)->orderBy('name')->get();
+        Player::insert($players);
+        $players = Player::orderBy('name')->get();
+        $rest = Player::where('id', '<>', 1)->orderBy('name')->get();
 
         $players->map(function($item) use($rest) {
             if($rest->count() > 0) {
                 foreach ($rest as $partner) {
-                    $team = \App\Models\Team::create(['name' => "{$item->name}-$partner->name"]);
+                    $team = Team::create(['name' => "{$item->name}-$partner->name"]);
                     $team->players()->sync([$item->id, $partner->id]);
                 }
                 $rest->shift();

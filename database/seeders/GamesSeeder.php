@@ -5,15 +5,16 @@ namespace Database\Seeders;
 use App\Models\Game;
 use App\Models\Team;
 use Carbon\Carbon;
+use Illuminate\Console\View\Components\TwoColumnDetail;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use PulkitJalan\Google\Facades\Google;
 
 class GamesSeeder extends Seeder
 {
-    const FIRST_ROW = 2;
-
-    const LAST_ROW = 2173;
+    const CHUNK = 250;
 
     public function run()
     {
@@ -21,18 +22,24 @@ class GamesSeeder extends Seeder
         $client->setScopes(\Google_Service_Sheets::SPREADSHEETS_READONLY);
         $sheets = new \Google_Service_Sheets($client);
         $spreadsheetId = config('google.client_id');
-        $from_row = self::FIRST_ROW;
-        $to_row = self::LAST_ROW;
-        $range = "martes!B{$from_row}:H{$to_row}";
-        $response = $sheets->spreadsheets_values->get($spreadsheetId, $range);
-        $rows = $response->getValues();
-        $this->createGames($rows);
+        do {
+            $total_games = Game::count();
+            $from_row = $total_games + 2; // because should start +1 but the first row is a title, so it is 1 + 1 = 2
+            $to_row = $from_row + self::CHUNK - 1;
+            $range = "martes!B{$from_row}:H{$to_row}";
+            $response = $sheets->spreadsheets_values->get($spreadsheetId, $range);
+            $rows = $response->getValues();
+            $this->createGames($rows);
+        } while(count($rows) === self::CHUNK);
     }
 
     protected function createGames($rows)
     {
         $date = now();
         foreach ($rows as $row) {
+            if(empty($row[1]) && empty($row[4])) {
+                return false;
+            }
             $date = empty($row[0]) ? $date : Carbon::createFromFormat('M d, Y', $row[0]);
             $players = explode('/', $row[1]);
             sort($players);
@@ -59,7 +66,10 @@ class GamesSeeder extends Seeder
             catch (\Exception $e) {
                 dd($row, $e);
             }
-            $this->command->info("Game created ID: {$game->id} - {$game->teamHome->name} {$game->team_home_score}-{$game->team_away_score} {$game->teamAway->name}");
+            with(new TwoColumnDetail($this->command->getOutput()))->render(
+                "{$game->teamHome->name} {$game->team_home_score}-{$game->team_away_score} {$game->teamAway->name}",
+                '<fg=green;options=bold>Game ID: ' . $game->id .'</>'
+            );
         }
     }
 }

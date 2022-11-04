@@ -1,8 +1,0 @@
-.headerImage {
-  color: var(--blue);
-  max-width: 360px;
-}
-
-.headerImage svg {
-  fill: var(--yellow);
-}
