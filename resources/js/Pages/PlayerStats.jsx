@@ -1,14 +1,13 @@
 import React, { useState } from 'react'
 import axios from '@/lib/axios'
-import { Link, Head } from '@inertiajs/inertia-react'
+import { Head } from '@inertiajs/inertia-react'
 import { Button, Input } from '@material-tailwind/react'
 import {GameVersion} from '@/lib/enums'
-import ApplicationLogo from '@/Components/ApplicationLogo'
 import GameVersionTags from '@/Components/GameVersionTags'
 import GuestLayout from '@/Layouts/GuestLayout';
 
-export default function Welcome(props) {
-    const [stats, setStats] = useState({teams: [], players: []})
+export default function Dashboard(props) {
+    const [stats, setStats] = useState([])
     const [versions, setVersions] = useState(Object.keys(GameVersion).map(item => ({active: false, name: item})))
     const [minGames, setMinGames] = useState('')
     const [from_at, setFromAt] = useState()
@@ -51,19 +50,16 @@ export default function Welcome(props) {
             filters += `&end_at=${until_at.toFormat('yyyy-MM-dd')}`;
         }
 
-        const response_teams = await axios.get(`/team_stats${filters}`)
-            .then(res => res.data)
-            .catch(error => console.log(error));
-
         const response_players = await axios.get(`/player_stats${filters}`)
             .then(res => res.data)
             .catch(error => console.log(error));
 
-        setStats({teams: response_teams?.data, players: response_players?.data})
+        setStats(response_players?.data)
     }
 
     return (
         <GuestLayout>
+            <Head title="Dashboard" />
             <div className="flex flex-col justify-start gap-2 md:flex-col p-2 md:w-80 md:p-8">
                     <div className="text-sm text-main-yellow">Filters</div>
                     <GameVersionTags versions={versions} onChange={onChangeTag} />
@@ -76,14 +72,13 @@ export default function Welcome(props) {
                     <table className="pes-table">
                         <thead>
                         <tr>
-                        <th>Team</th>
+                        <th>Player</th>
                         <th>Percentage</th>
                         <th>Record</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {
-                            stats?.teams.map((item, i) => {
+                        { stats.map((item, i) => {
                                 const {name, win, draw, lost, average} = item
                                 const record = `${win}-${draw}-${lost}`
                                 return (

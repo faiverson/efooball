@@ -95,7 +95,6 @@ class TeamController extends Controller
             'teams' => $teams,
         ];
 
-
         return response()->json(['data' => $response]);
     }
 

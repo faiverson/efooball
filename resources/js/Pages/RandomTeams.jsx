@@ -3,19 +3,28 @@ import axios from '@/lib/axios'
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Button, Chip } from '@material-tailwind/react';
 
-function PlayerChip({player, status, onChange}) {
+const PlayerChipType = {
+    head: 'head',
+    tail: 'tail',
+};
+
+function PlayerChip({type, player, selected, onChange}) {
   const onClick = ev => {
     ev.preventDefault()
-    onChange(player)
+    onChange(type, player)
   }
+
   const attributes = {
-    ...(status && {
-        dismissible: () => {}
-    })
+    ...(selected && {
+        dismissible: {
+          onClose: ev => onClick(ev, type, player),
+        },
+    }),
+    ...(!selected && {onClick: ev => onClick(ev, type, player)})
   }
 
   return (
-    <Chip color={status ? "green" : "amber"} value={player.name} attributes onClick={onClick} />
+    <Chip color={selected ? "green" : "amber"} value={player.name} {...attributes} />
   )
 }
 
@@ -25,9 +34,9 @@ export default function RandomTeams({ players }) {
     const [tailSelected, setTailSelected] = useState(new Set())
 
     const onChange = (type, player) => {
-        const selPlayers = new Set(type === 'head' ? headSelected: tailSelected)
-        selPlayers.add(player)
-        type === 'head' ? setHeadSelected(selPlayers) : setTailSelected(selPlayers)
+        const selPlayers = new Set(type === PlayerChipType.head ? headSelected : tailSelected)
+        selPlayers.has(player) ? selPlayers.delete(player) : selPlayers.add(player);
+        type === PlayerChipType.head ? setHeadSelected(selPlayers) : setTailSelected(selPlayers)
     }
 
     const onSubmit = async ev => {
@@ -45,30 +54,32 @@ export default function RandomTeams({ players }) {
     const head_players = Array.from(headSelected)
     const tail_players = Array.from(tailSelected)
 
-    console.log(data)
     return (
         <GuestLayout>
             <div className="container flex flex-wrap flex-column mt-8">
-                <h3 className="text-lg text-main-yellow">Select Head Players</h3>
-                <div className="container flex flex-wrap flex-row gap-4 items-center mt-4">
-                { players.filter(item => !tailSelected.has(item)).map( item => {
-                        return (
-                            <PlayerChip key={item.name} player={item} onChange={player => onChange('head', player)} status={headSelected.has(item)} />
-                        )
-                    })
-                }
+                <div className="w-full m-8">
+                    <h3 className="text-lg text-main-yellow">Select Head Players</h3>
+                    <div className="grid auto-rows-min grid-cols-7 gap-4 mt-4 w-fit mx-auto justify-items-center">
+                    { players.filter(item => !tailSelected.has(item)).map( item => {
+                            return (
+                                // <PlayerChip key={item.name} type={PlayerChipType.head} player={item} onChange={onChange} selected={headSelected.has(item)} />
+                                <div key={item.name} className="min-w-0 w-fit"><PlayerChip type={PlayerChipType.head} player={item} onChange={onChange} selected={headSelected.has(item)} /></div>
+                            )
+                        })
+                    }
+                    </div>
+                    <h3 className="text-lg text-main-yellow mt-4">Select Tail Players</h3>
+                    <div className="grid auto-rows-min grid-cols-7 gap-4 mt-4 w-fit mx-auto justify-items-center">
+                    { players.filter(item => !headSelected.has(item)).map( item => {
+                            return (
+                                <PlayerChip key={item.name} type={PlayerChipType.tail} player={item} onChange={onChange} selected={tailSelected.has(item)} />
+                            )
+                        })
+                    }
+                    </div>
                 </div>
-                <h3 className="text-lg text-main-yellow mt-4">Select Tail Players</h3>
-                <div className="container flex flex-wrap flex-row gap-4 items-center mt-4">
-                { players.filter(item => !headSelected.has(item)).map( item => {
-                        return (
-                            <PlayerChip key={item.name} player={item} onChange={player => onChange('tail', player)} status={tailSelected.has(item)} />
-                        )
-                    })
-                }
-                </div>
-                <div className="w-full">
-                    <div className="flex flex-wrap flex-col items-center mx-auto p-4 mt-4 bg-white rounded gap-4 w-fit">
+                <div className="w-full m-8">
+                    <div className="flex flex-wrap flex-col items-center mx-auto p-4 mt-4 bg-white rounded gap-4 w-fit border-2 border-orange-300">
                         <div className="flex flex-wrap flex-row justify-start items-start gap-4">
                             <div className="flex flex-col">
                                 <h4 className="text-lg text-main-blue font-bold">Head Selection</h4>
@@ -85,12 +96,15 @@ export default function RandomTeams({ players }) {
                         </div>
                         <Button onClick={onSubmit} variant="filled" color="yellow">Randomize</Button>
                     </div>
-                    <div className="mx-auto mt-4 bg-white rounded flex flex-wrap flex-col w-fit p-4">
-                        <h4 className="text-lg text-main-blue font-bold">TEAMS</h4>
+                    {!!data.length > 0 &&
+                    <div className="mx-auto mt-4 bg-white rounded border-2 border-orange-300 flex flex-wrap flex-col w-fit p-4">
+                        <h4 className="text-lg text-main-blue font-bold">TEAMS CREATED</h4>
                         <ul className="flex flex-col">
                         { data.map(team => <li key={team.id} className="text-main-blue">{team.name}</li>) }
                         </ul>
                     </div>
+                    }
+
                 </div>
             </div>
         </GuestLayout>

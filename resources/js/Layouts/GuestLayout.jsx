@@ -22,6 +22,7 @@ export default function Guest({ user, children }) {
             </header>
             <div className="container md:mx-auto flex gap-8 md:flex-column">
                 <Link href={route('home')} className="text-main-yellow dark:text-alternative-yellow">Home</Link>
+                <Link href={route('players-stats')} className="text-main-yellow dark:text-alternative-yellow">Player Stats</Link>
                 <Link href={route('random-teams')} className="text-main-yellow dark:text-alternative-yellow">Random</Link>
             </div>
             <div className="container md:mx-auto flex md:flex-row">

@@ -4,6 +4,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\TeamController;
+use App\Http\Controllers\TelegramBotController;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,5 +31,14 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::get('random-teams', [TeamController::class, 'random_teams'])->name('random-teams');
+
+Route::get('/players-stats', function () {
+    return Inertia::render('PlayerStats', [
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+        'laravelVersion' => Application::VERSION,
+        'phpVersion' => PHP_VERSION,
+    ]);
+})->name('players-stats');
 
 require __DIR__.'/auth.php';
