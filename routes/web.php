@@ -26,6 +26,35 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
+// no anda todavia el webhook, usamos getUpdates instead
+Route::match(['get', 'post'], '/webhook/{token}', function () {
+    $tg = app('telegram.bot');
+    $updates = $tg->getWebhookUpdates();
+    return json_encode($updates);
+});
+
+Route::get('/telegram', function () {
+    $telegram = app('telegram.bot');
+    // $response = $telegram->getMe();
+    // $response = $telegram->getUpdates();
+
+    //testing a message
+    $response = $telegram->sendMessage([
+        'chat_id' => env('TELEGRAM_CHAT_ID'),
+        'text' => 'Hello world!'
+    ]);
+    return json_encode($response);
+});
+
+Route::get('/create-hook', function () {
+    $baseurl = env('APP_URL');
+    $token = env('TELEGRAM_TOKEN');
+    $telegram = app('telegram.bot');
+    $telegram->removeWebhook();
+    $response = $telegram->setWebhook(['url' => "https://api.telegram.org/bot${$token}/setWebhook?url=${$baseurl}/webhook/${$token}"]);
+    return json_encode($response);
+});
+
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');

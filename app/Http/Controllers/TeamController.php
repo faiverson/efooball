@@ -10,6 +10,7 @@ use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Artisan;
 
 class TeamController extends Controller
 {
@@ -95,7 +96,23 @@ class TeamController extends Controller
             'teams' => $teams,
         ];
 
+        $message = $this->parseMessage($response);
+
+        Artisan::call('tg:send', [
+            'message' => $message
+        ]);
+
         return response()->json(['data' => $response]);
+    }
+
+    private function parseMessage(array $response): string
+    {
+        $player = $response['modality'];
+        $teams = '';
+        foreach($response['teams'] as $team) {
+            $teams .= "\n{$team->name}";
+        }
+        return "El que elige la modalidad es: {$player->name}\n\nLos equipos son: $teams";
     }
 
     private function balance(&$bigger, &$lower)
