@@ -6,6 +6,8 @@ use Inertia\Inertia;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\TelegramBotController;
 use App\Http\Controllers\TournamentController;
+use App\Http\Controllers\PlayerController;
+use App\Http\Controllers\HomeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,14 +20,7 @@ use App\Http\Controllers\TournamentController;
 |
 */
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-})->name('home');
+Route::get('/', HomeController::class . '@homepage')->name('home');
 
 // no anda todavia el webhook, usamos getUpdates instead
 Route::match(['get', 'post'], '/webhook/{token}', function () {
@@ -55,10 +50,6 @@ Route::get('/create-hook', function () {
     $response = $telegram->setWebhook(['url' => "https://api.telegram.org/bot${$token}/setWebhook?url=${$baseurl}/webhook/${$token}"]);
     return json_encode($response);
 });
-
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::get('random-teams', [TeamController::class, 'random_teams'])->name('random-teams');
 
