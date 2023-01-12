@@ -27,4 +27,5 @@ Route::controller(PlayerController::class)->group(function () {
 Route::controller(TeamController::class)->group(function () {
     Route::get('/team_stats', 'stats');
     Route::post('/random', 'random');
+    Route::post('/strikes', 'strikes');
 });

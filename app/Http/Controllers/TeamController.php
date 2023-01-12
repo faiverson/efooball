@@ -105,6 +105,11 @@ class TeamController extends Controller
         return response()->json(['data' => $response]);
     }
 
+    public function strikes(Request $request)
+    {
+        return 'not build';
+    }
+
     private function parseMessage(array $response): string
     {
         $player = $response['modality'];

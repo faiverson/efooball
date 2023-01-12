@@ -24,6 +24,8 @@ export default function Guest({ user, children }) {
                 <Link href={route('home')} className="text-main-yellow dark:text-alternative-yellow">Home</Link>
                 <Link href={route('players-stats')} className="text-main-yellow dark:text-alternative-yellow">Player Stats</Link>
                 <Link href={route('random-teams')} className="text-main-yellow dark:text-alternative-yellow">Random</Link>
+                <Link href={route('libertadores')} className="text-main-yellow dark:text-alternative-yellow">Libertadores</Link>
+                <Link href={route('sudamericana')} className="text-main-yellow dark:text-alternative-yellow">Sudamericana</Link>
             </div>
             <div className="container md:mx-auto flex md:flex-row">
                 {children}

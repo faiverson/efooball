@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\TelegramBotController;
+use App\Http\Controllers\TournamentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -69,5 +70,10 @@ Route::get('/players-stats', function () {
         'phpVersion' => PHP_VERSION,
     ]);
 })->name('players-stats');
+
+Route::controller(TournamentController::class)->group(function () {
+    Route::get('/tournaments/libertadores', 'libertadores')->name('libertadores');
+    Route::get('/tournaments/sudamericana', 'sudamericana')->name('sudamericana');
+});
 
 require __DIR__.'/auth.php';
