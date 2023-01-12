@@ -54,7 +54,7 @@ class TeamController extends Controller
       $query->whereBetween('g.created_at', [$args->start_at, $args->end_at]);
 
       $query->groupBy(["$team_table.name", "$team_table.id"]);
-      $query->havingRaw('COUNT(`g`.`id`) > ?',  [$args->min_amount]);
+      $query->havingRaw('COUNT(`g`.`id`) >= ?',  [$args->min_amount]);
       $query->orderByRaw('average DESC');
 
 

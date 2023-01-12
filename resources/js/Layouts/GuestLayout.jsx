@@ -27,7 +27,7 @@ export default function Guest({ user, children }) {
                 <Link href={route('libertadores')} className="text-main-yellow dark:text-alternative-yellow">Libertadores</Link>
                 <Link href={route('sudamericana')} className="text-main-yellow dark:text-alternative-yellow">Sudamericana</Link>
             </div>
-            <div className="container md:mx-auto flex md:flex-row">
+            <div className="container md:mx-auto flex md:flex-row mt-8">
                 {children}
             </div>
         </div>
