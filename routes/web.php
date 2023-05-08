@@ -1,12 +1,11 @@
 <?php
 
+use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use App\Http\Controllers\TeamController;
-use App\Http\Controllers\TelegramBotController;
 use App\Http\Controllers\TournamentController;
-use App\Http\Controllers\PlayerController;
+use App\Http\Controllers\TeamController;
 use App\Http\Controllers\HomeController;
 
 /*
@@ -22,34 +21,9 @@ use App\Http\Controllers\HomeController;
 
 Route::get('/', HomeController::class . '@homepage')->name('home');
 
-// no anda todavia el webhook, usamos getUpdates instead
-Route::match(['get', 'post'], '/webhook/{token}', function () {
-    $tg = app('telegram.bot');
-    $updates = $tg->getWebhookUpdates();
-    return json_encode($updates);
-});
-
-Route::get('/telegram', function () {
-    $telegram = app('telegram.bot');
-    // $response = $telegram->getMe();
-    // $response = $telegram->getUpdates();
-
-    //testing a message
-    $response = $telegram->sendMessage([
-        'chat_id' => env('TELEGRAM_CHAT_ID'),
-        'text' => 'Hello world!'
-    ]);
-    return json_encode($response);
-});
-
-Route::get('/create-hook', function () {
-    $baseurl = env('APP_URL');
-    $token = env('TELEGRAM_TOKEN');
-    $telegram = app('telegram.bot');
-    $telegram->removeWebhook();
-    $response = $telegram->setWebhook(['url' => "https://api.telegram.org/bot${$token}/setWebhook?url=${$baseurl}/webhook/${$token}"]);
-    return json_encode($response);
-});
+Route::get('/dashboard', function () {
+    return Inertia::render('Dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::get('random-teams', [TeamController::class, 'random_teams'])->name('random-teams');
 
@@ -65,6 +39,12 @@ Route::get('/players-stats', function () {
 Route::controller(TournamentController::class)->group(function () {
     Route::get('/tournaments/libertadores', 'libertadores')->name('libertadores');
     Route::get('/tournaments/sudamericana', 'sudamericana')->name('sudamericana');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 require __DIR__.'/auth.php';

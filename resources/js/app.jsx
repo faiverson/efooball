@@ -1,27 +1,21 @@
 import './bootstrap';
 import '../css/app.css';
 
-import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { createInertiaApp } from '@inertiajs/inertia-react';
-import { InertiaProgress } from '@inertiajs/progress';
-import { ThemeProvider } from "@material-tailwind/react";
+import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 
-const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'eFootball';
+const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Laravel';
 
 createInertiaApp({
-    title: title => `${title} - ${appName}`,
-    resolve: name => resolvePageComponent(`./Pages/${name}.jsx`, import.meta.glob('./Pages/**/*.jsx')),
+    title: (title) => `${title} - app ${appName}`,
+    resolve: (name) => resolvePageComponent(`./Pages/${name}.jsx`, import.meta.glob('./Pages/**/*.jsx')),
     setup({ el, App, props }) {
         const root = createRoot(el);
 
-        root.render(
-            <ThemeProvider>
-                <App {...props} />
-            </ThemeProvider>
-        );
+        root.render(<App {...props} />);
+    },
+    progress: {
+        color: '#4B5563',
     },
 });
-
-InertiaProgress.init({ color: '#4B5563' });

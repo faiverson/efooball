@@ -1,78 +1,86 @@
 @tailwind base;
 
 :root {
-    --blue-light: #02027D;
-    --blue: #0909BD;
-    --blue-alternative: #04049A;
-    --blue-dark-alternative: #01015F;
-    --blue-dark: #00003A;
-    --yellow-light: #B3A200;
-    --yellow: #FFE800;
-    --yellow-alternative: #DBC800;
-    --yellow-dark-alternative: #887C00;
-    --yellow-dark: #534C00;
-    --orange-light: #B36600;
-    --orange: #FF9200;
-    --orange-alternative: #DB7E00;
-    --orange-dark-alternative: #884E00;
-    --orange-dark: #533000;
-    --xl: 1280px;
+  --blue-light: #02027D;
+  --blue: #0909BD;
+  --blue-alternative: #04049A;
+  --blue-dark-alternative: #01015F;
+  --blue-dark: #00003A;
+  --yellow-light: #B3A200;
+  --yellow: #FFE800;
+  --yellow-alternative: #DBC800;
+  --yellow-dark-alternative: #887C00;
+  --yellow-dark: #534C00;
+  --orange-light: #B36600;
+  --orange: #FF9200;
+  --orange-alternative: #DB7E00;
+  --orange-dark-alternative: #884E00;
+  --orange-dark: #533000;
+  --xl: 1280px;
 }
 
 @layer base {
-    @font-face {
-        font-family: "eFootball Stencil";
-        src: url('fonts/eFootballStencil-Regular.woff') format('woff');
-    }
-    @font-face {
-        font-family: "eFootball Sans";
-        src: url('fonts/eFootballSans-Regular.woff') format('woff');
-    }
+  @font-face {
+    font-family: "eFootball Stencil";
+    src: url('fonts/eFootballStencil-Regular.woff') format('woff');
+  }
+  @font-face {
+    font-family: "eFootball Sans";
+    src: url('fonts/eFootballSans-Regular.woff') format('woff');
+  }
 
-    body {
-        font-family: "eFootball Sans", sans-serif;
-        background-color: theme('colors.blue-dark');
-        color: theme('colors.main-yellow');
-    }
+  body {
+    font-family: "eFootball Sans", sans-serif;
+    background-color: theme('colors.blue-dark');
+    color: theme('colors.main-yellow');
+  }
 
-    .container {
-        min-width: var(--xl);
-    }
+  .container {
+    min-width: var(--xl);
+  }
 
-    header {
-        box-sizing: content-box;
-    }
+  header {
+    box-sizing: content-box;
+  }
 
-    .background-primary {
-        background-color: theme('colors.main-blue');
-    }
+  .background-primary {
+    background-color: theme('colors.main-blue');
+  }
 
-    .background-dark {
-        background-color: theme('colors.blue-dark');
-    }
+  .background-dark {
+    background-color: theme('colors.blue-dark');
+  }
 
-    .pes-table {
-        @apply box-border text-white mb-4 border-collapse table border-spacing-2 rounded-sm;
-        background-color: theme('colors.blue-alternative');
-    }
+  .pes-table {
+    border: 0;
+    color: var(--white);
+    background-color: theme('colors.blue-alternative');
+    margin-bottom: 1rem;
+    border-collapse: collapse;
+    box-sizing: border-box;
+    display: table;
+    border-spacing: 2px;
+  }
 
-    .pes-table thead th {
-        padding: 20px 40px;
-        font-size: 15px;
-        border-bottom: 4px solid var(--yellow);
-        vertical-align: bottom;
-        color: var(--yellow-alternative);
-    }
+  .pes-table thead th {
+    border: none;
+    padding: 20px 40px;
+    font-size: 15px;
+    border-bottom: 4px solid var(--yellow);
+    vertical-align: bottom;
+    color: var(--yellow-alternative);
+  }
 
-    .pes-table tbody tr {
-        margin-bottom: 10px;
-    }
+  .pes-table tbody tr {
+    margin-bottom: 10px;
+  }
 
-    .pes-table tbody th, .pes-table tbody td {
-        padding: 20px 30px;
-        border-bottom: 3px solid var(--yellow-alternative);
-        font-size: 14px;
-    }
+  .pes-table tbody th, .pes-table tbody td {
+    border: none;
+    padding: 20px 30px;
+    border-bottom: 3px solid var(--yellow-alternative);
+    font-size: 14px;
+  }
 }
 
 @tailwind components;

@@ -10,7 +10,7 @@ use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
-use Artisan;
+use Illuminate\Support\Facades\Artisan;
 
 class TeamController extends Controller
 {
@@ -57,7 +57,6 @@ class TeamController extends Controller
       $query->havingRaw('COUNT(`g`.`id`) >= ?',  [$args->min_amount]);
       $query->orderByRaw('average DESC');
 
-
       return response()->json(['data' => $query->get()]);
     }
 
@@ -98,9 +97,9 @@ class TeamController extends Controller
 
         $message = $this->parseMessage($response);
 
-        Artisan::call('tg:send', [
-            'message' => $message
-        ]);
+//        Artisan::call('tg:send', [
+//            'message' => $message
+//        ]);
 
         return response()->json(['data' => $response]);
     }

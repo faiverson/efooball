@@ -1,10 +1,9 @@
-import React from 'react';
 import GuestLayout from '@/Layouts/GuestLayout';
 import PrimaryButton from '@/Components/PrimaryButton';
-import { Head, Link, useForm } from '@inertiajs/inertia-react';
+import { Head, Link, useForm } from '@inertiajs/react';
 
 export default function VerifyEmail({ status }) {
-    const { post, processing } = useForm();
+    const { post, processing } = useForm({});
 
     const submit = (e) => {
         e.preventDefault();
@@ -29,13 +28,13 @@ export default function VerifyEmail({ status }) {
 
             <form onSubmit={submit}>
                 <div className="mt-4 flex items-center justify-between">
-                    <PrimaryButton processing={processing}>Resend Verification Email</PrimaryButton>
+                    <PrimaryButton disabled={processing}>Resend Verification Email</PrimaryButton>
 
                     <Link
                         href={route('logout')}
                         method="post"
                         as="button"
-                        className="underline text-sm text-gray-600 hover:text-gray-900"
+                        className="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                     >
                         Log Out
                     </Link>
