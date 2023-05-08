@@ -30,4 +30,10 @@ class Game extends Model
     {
         return $this->hasOne(Team::class, 'id', 'team_away_id');
     }
+
+    public static function latestGames(): \Illuminate\Database\Eloquent\Builder
+    {
+      $latestDate = static::query()->max('created_at');
+      return static::query()->where('created_at', $latestDate);
+    }
 }

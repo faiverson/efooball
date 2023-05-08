@@ -1,9 +1,8 @@
-import { useState, useEffect } from "react"
+import {useState, useEffect} from "react"
 import { Checkbox } from "@material-tailwind/react";
 
 function VersionTag({name, status, onChange}) {
   const [tag, setTag] = useState(status)
-
   const change = (ev, name) => {
     ev.preventDefault()
     onChange(name)
@@ -15,7 +14,8 @@ function VersionTag({name, status, onChange}) {
 
   return (
     <div className="flex items-center">
-      <Checkbox color="amber" onChange={ev => change(ev, name)} checked={tag} id={`tag-${name}`} label={name.replace('_', ' ')} />
+      <Checkbox color="yellow" onChange={ev => change(ev, name)} checked={tag} id={`tag-${name}`} />
+      <label htmlFor={`tag-${name}`}>{name.replace('_', ' ')}</label>
     </div>
   )
 }
