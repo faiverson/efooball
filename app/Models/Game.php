@@ -3,23 +3,21 @@
 namespace App\Models;
 
 use App\Enums\GameVersion;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Game extends Model
 {
-    use HasFactory;
-
-    protected $table = 'games';
-
     protected $with = ['teamHome', 'teamAway'];
 
     protected $casts = [
       'version' => GameVersion::class,
+      'played_at' => 'date:Y-m-d'
     ];
 
     protected $guarded = [];
+
+    public $timestamps = false;
 
     public function teamHome(): HasOne
     {
@@ -33,7 +31,7 @@ class Game extends Model
 
     public static function latestGames(): \Illuminate\Database\Eloquent\Builder
     {
-      $latestDate = static::query()->max('created_at');
-      return static::query()->where('created_at', $latestDate);
+      $latestDate = static::query()->max('played_at');
+      return static::query()->where('played_at', $latestDate);
     }
 }

@@ -21,7 +21,7 @@ return new class extends Migration
             $table->unsignedInteger('team_away_score');
             $table->enum('result', ['home', 'draw', 'away']);
             $table->string('version');
-            $table->timestamps();
+            $table->date('played_at');
         });
     }
 

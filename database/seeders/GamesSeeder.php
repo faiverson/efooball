@@ -44,13 +44,20 @@ class GamesSeeder extends Seeder
 
     protected function createGames($rows)
     {
-        $date_at = now();
+        $t_id = 0;
+        $date_at = null;
         foreach ($rows as $row) {
             [$date, $home, $team_home_score, $team_away_score, $away, $winner, $version, $tournament] = $row + [7 => ''];
             if(empty($home) && empty($away)) {
                 return false;
             }
-            $date_at = empty($date) ? $date_at : Carbon::createFromFormat('M d, Y', $date);
+
+            if(empty($date) && empty($date_at)) {
+              $date_at = Carbon::createFromFormat('Y-m-d', Game::max('played_at'));
+            } elseif(!empty($date)) {
+              $date_at = Carbon::createFromFormat('M d, Y', $date);
+            }
+
             $players = explode('/', $home);
             sort($players);
             $home = Team::where('name', "{$players[0]}-{$players[1]}")->first();
@@ -70,8 +77,7 @@ class GamesSeeder extends Seeder
                     'team_away_score'=> $team_away_score,
                     'version'=> Str::replace(' ', '_', strtolower($version)),
                     'result'=> $team_home_score >= $team_away_score ? ($team_home_score > $team_away_score ? 'home' : 'draw')  : 'away',
-                    'created_at'=> $date_at->format('Y-m-d H:i:s'),
-                    'updated_at'=> $date_at->format('Y-m-d H:i:s'),
+                    'played_at'=> $date_at->format('Y-m-d'),
                 ]);
 
                 if(!empty($tournament)) {
@@ -91,9 +97,17 @@ class GamesSeeder extends Seeder
                     $selTournament->positions = $this->calculateTournamentPosition($selTournament->games);
                     $selTournament->save();
 
-                    with(new TwoColumnDetail($this->command->getOutput()))->render(
+                    if($selTournament->id !== $t_id) {
+                      $t_id = $selTournament->id;
+                      with(new TwoColumnDetail($this->command->getOutput()))->render(
                         '<fg=blue;options=bold>Tournament ID: ' . $selTournament->id .'</>'
-                    );
+                      );
+                    }
+                } elseif($t_id > 0) {
+                  $t_id = 0;
+                  with(new TwoColumnDetail($this->command->getOutput()))->render(
+                    '<fg=blue;options=bold>End Tournament</>'
+                  );
                 }
             }
             catch (\Exception $e) {
@@ -101,7 +115,7 @@ class GamesSeeder extends Seeder
             }
 
             with(new TwoColumnDetail($this->command->getOutput()))->render(
-                "{$game->teamHome->name} {$game->team_home_score}-{$game->team_away_score} {$game->teamAway->name}",
+                "{$game->teamHome->name} {$game->team_home_score}-{$game->team_away_score} {$game->teamAway->name} ({$game->played_at})",
                 '<fg=green;options=bold>Game ID: ' . $game->id .'</>'
             );
         }
