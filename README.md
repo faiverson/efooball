@@ -13,6 +13,6 @@ Use docker compose to build the image and later run npm install and npm run dev 
 
 ## About Martes de PES
 
-- The last thing is done was the HomePage
+- The last thing is done was the Player Stats
 
-- Next Step is to check: Player Stats, Random, Libertadores and Sudamericana sections
+- Next Step is to check: Random, Libertadores and Sudamericana sections

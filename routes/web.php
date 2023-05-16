@@ -7,6 +7,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\TournamentController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PlayerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,14 +28,7 @@ Route::get('/dashboard', function () {
 
 Route::get('random-teams', [TeamController::class, 'random_teams'])->name('random-teams');
 
-Route::get('/players-stats', function () {
-    return Inertia::render('PlayerStats', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-})->name('players-stats');
+Route::get('players-stats', [PlayerController::class, 'stats'])->name('players-stats');
 
 Route::controller(TournamentController::class)->group(function () {
     Route::get('/tournaments/libertadores', 'libertadores')->name('libertadores');

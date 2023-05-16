@@ -7,12 +7,13 @@ import {GameVersion} from '@/lib/enums'
 import GameVersionTags from '@/Components/GameVersionTags'
 import GuestLayout from '@/Layouts/GuestLayout';
 
-export default function Dashboard(props) {
-    const [stats, setStats] = useState([])
-    const [versions, setVersions] = useState(Object.keys(GameVersion).map(item => ({active: false, name: item})))
-    const [minGames, setMinGames] = useState('')
-    const [from_at, setFromAt] = useState()
-    const [until_at, setUntilAt] = useState()
+export default function PlayerStats({data, current_version, start_at, end_at, min_amount}) {
+  console.log(data, current_version, start_at, end_at, min_amount)
+    const [stats, setStats] = useState(data ?? [])
+    const [versions, setVersions] = useState(Object.keys(GameVersion).map(item => ({active: current_version === item.toLowerCase(), name: item})))
+    const [minGames, setMinGames] = useState(min_amount)
+    const [from_at, setFromAt] = useState(DateTime.fromFormat(start_at, 'yyyy-MM-dd'))
+    const [until_at, setUntilAt] = useState(DateTime.fromFormat(end_at, 'yyyy-MM-dd'))
 
     const onChangeTag = tag => {
         const newVersions = [...versions]
@@ -27,13 +28,14 @@ export default function Dashboard(props) {
     }
 
     const handleChange = (ev, field) => {
-        ev.preventDefault()
-        const date = DateTime.fromFormat(ev.target.value, 'yyyy-MM-dd');
-        if(field === 'from_at') {
-            setFromAt(date)
-        } else if(field === 'until_at') {
-            setUntilAt(date)
-        }
+      ev.preventDefault()
+      let value = ev.target.value;
+      const date = value ? DateTime.fromFormat(value, 'yyyy-MM-dd') : null
+      if(field === 'from_at') {
+        setFromAt(date)
+      } else if(field === 'until_at') {
+        setUntilAt(date)
+      }
     }
 
     const onSubmit = async ev => {
@@ -60,7 +62,6 @@ export default function Dashboard(props) {
 
     return (
         <GuestLayout>
-            <Head title="Dashboard" />
             <div className="flex flex-col justify-start gap-2 md:flex-col p-2 md:w-80 md:p-8">
                     <div className="text-sm text-main-yellow">Filters</div>
                     <GameVersionTags versions={versions} onChange={onChangeTag} />
@@ -74,19 +75,21 @@ export default function Dashboard(props) {
                         <thead>
                         <tr>
                         <th>Player</th>
-                        <th>Percentage</th>
+                        <th>Games</th>
                         <th>Record</th>
+                        <th>Percentage</th>
                         </tr>
                         </thead>
                         <tbody>
                         { stats.map((item, i) => {
-                                const {name, win, draw, lost, average} = item
+                                const {name, win, draw, lost, average, total} = item
                                 const record = `${win}-${draw}-${lost}`
                                 return (
-                                <tr key={i}>
+                                <tr key={i} className="text-center">
                                     <td>{name}</td>
-                                    <td>{average}%</td>
+                                    <td>{total}</td>
                                     <td>{record}</td>
+                                    <td>{average}%</td>
                                 </tr>
                                 )
                             })

@@ -21,7 +21,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::controller(PlayerController::class)->group(function () {
-    Route::get('/player_stats', 'stats');
+    Route::get('/player_stats', 'api_stats');
 });
 
 Route::controller(TeamController::class)->group(function () {

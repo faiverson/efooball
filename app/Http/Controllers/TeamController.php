@@ -6,11 +6,11 @@ use App\Enums\GameVersion;
 use App\Models\Game;
 use App\Models\Team;
 use App\Models\Player;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Artisan;
 
 class TeamController extends Controller
 {
@@ -23,41 +23,9 @@ class TeamController extends Controller
         'min_amount' => $request->min_amount ?? 10
       ];
 
-      $team_table = (new Team())->getTable();
-      $game_table = (new Game())->getTable();
-
-      $query = DB::table('teams');
-
-      $query->select([
-        "$team_table.name",
-      ]);
-      $query->selectRaw("COUNT(`g`.`id`) as total");
-      $query->selectRaw("SUM(CASE WHEN (`g`.`team_home_id` = `teams`.`id` AND `g`.`team_home_score` > `g`.`team_away_score`) THEN 1
-	                                          WHEN (`g`.`team_away_id` = `teams`.`id` AND `g`.`team_home_score` < `g`.`team_away_score`) THEN 1
-                                            ELSE 0 END) as win");
-      $query->selectRaw("SUM(CASE WHEN `g`.`team_home_score` = `g`.`team_away_score` THEN 1 ELSE 0 END) as draw");
-      $query->selectRaw("SUM(CASE WHEN (`g`.`team_home_id` = `teams`.`id` AND `g`.`team_home_score` < `g`.`team_away_score`) THEN 1
-	                                          WHEN (`g`.`team_away_id` = `teams`.`id` AND `g`.`team_home_score` > `g`.`team_away_score`) THEN 1
-	                                          ELSE 0 END) as lost");
-
-      $query->selectRaw("CAST(((SUM(CASE WHEN (`g`.`team_home_id` = `teams`.`id` AND `g`.`team_home_score` > `g`.`team_away_score`) THEN 3
-	                                          WHEN (`g`.`team_away_id` = `teams`.`id` AND `g`.`team_home_score` < `g`.`team_away_score`) THEN 3
-	                                          WHEN `g`.`team_home_score` = `g`.`team_away_score` THEN 1 END) / (COUNT(`g`.`id`) * 3)) * 100) AS DECIMAL(8,2))
-	                                          as average");
-
-      $query->join("$game_table AS g", function (JoinClause $join) use ($team_table, $args) {
-        $join->on('g.team_home_id', '=', "$team_table.id")
-             ->orOn('g.team_away_id', '=', "$team_table.id");
-      });
-
-      $query->whereIn('g.version',  $args->versions);
-      $query->whereBetween('g.created_at', [$args->start_at, $args->end_at]);
-
-      $query->groupBy(["$team_table.name", "$team_table.id"]);
-      $query->havingRaw('COUNT(`g`.`id`) >= ?',  [$args->min_amount]);
-      $query->orderByRaw('average DESC');
-
-      return response()->json(['data' => $query->get()]);
+      $query = $this->queryTeamStats($args->versions, $args->start_at, $args->end_at, $args->min_amount);
+      return Inertia::render('PlayerStats', ['data' => $query->get()]);
+//      return response()->json(['data' => $query->get()]);
     }
 
     public function random_teams(Request $request)
@@ -107,6 +75,41 @@ class TeamController extends Controller
     public function strikes(Request $request)
     {
         return 'not build';
+    }
+
+    private function queryPlayerStats(array $versions, string $start_at = null, string $end_at = null, int $min_amount = 1): Builder
+    {
+        $query = DB::table('teams');
+        $team_table = (new Team())->getTable();
+        $game_table = (new Game())->getTable();
+
+        $query->select(["$team_table.name"]);
+        $query->selectRaw("COUNT(`g`.`id`) as total");
+        $query->selectRaw("SUM(CASE WHEN (`g`.`team_home_id` = `teams`.`id` AND `g`.`team_home_score` > `g`.`team_away_score`) THEN 1
+                                              WHEN (`g`.`team_away_id` = `teams`.`id` AND `g`.`team_home_score` < `g`.`team_away_score`) THEN 1
+                                              ELSE 0 END) as win");
+        $query->selectRaw("SUM(CASE WHEN `g`.`team_home_score` = `g`.`team_away_score` THEN 1 ELSE 0 END) as draw");
+        $query->selectRaw("SUM(CASE WHEN (`g`.`team_home_id` = `teams`.`id` AND `g`.`team_home_score` < `g`.`team_away_score`) THEN 1
+                                              WHEN (`g`.`team_away_id` = `teams`.`id` AND `g`.`team_home_score` > `g`.`team_away_score`) THEN 1
+                                              ELSE 0 END) as lost");
+
+        $query->selectRaw("CAST(((SUM(CASE WHEN (`g`.`team_home_id` = `teams`.`id` AND `g`.`team_home_score` > `g`.`team_away_score`) THEN 3
+                                              WHEN (`g`.`team_away_id` = `teams`.`id` AND `g`.`team_home_score` < `g`.`team_away_score`) THEN 3
+                                              WHEN `g`.`team_home_score` = `g`.`team_away_score` THEN 1 END) / (COUNT(`g`.`id`) * 3)) * 100) AS DECIMAL(8,2))
+                                              as average");
+
+        $query->join("$game_table AS g", function (JoinClause $join) use ($team_table) {
+          $join->on('g.team_home_id', '=', "$team_table.id")
+            ->orOn('g.team_away_id', '=', "$team_table.id");
+        });
+
+        $query->whereIn('g.version',  $versions);
+        $query->whereBetween('g.played_at', [$start_at, $end_at]);
+
+        $query->groupBy(["$team_table.name", "$team_table.id"]);
+        $query->havingRaw('COUNT(`g`.`id`) >= ?',  [$min_amount]);
+        $query->orderByRaw('average DESC');
+        return $query;
     }
 
     private function parseMessage(array $response): string
