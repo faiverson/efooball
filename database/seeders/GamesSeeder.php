@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use PulkitJalan\Google\Facades\Google;
-use App\Enums\TournamentType;
 
 class GamesSeeder extends Seeder
 {
@@ -25,11 +24,13 @@ class GamesSeeder extends Seeder
         $sheets = new \Google_Service_Sheets($client);
         $spreadsheetId = config('google.client_id');
 
-        Schema::disableForeignKeyConstraints();
-        DB::table('tournaments')->truncate();
-        DB::table('team_strikes')->truncate();
-        DB::table('games')->truncate();
-        Schema::enableForeignKeyConstraints();
+        if(env('RESET_DATABASE')) {
+            Schema::disableForeignKeyConstraints();
+            DB::table('tournaments')->truncate();
+            DB::table('team_strikes')->truncate();
+            DB::table('games')->truncate();
+            Schema::enableForeignKeyConstraints();
+        }
 
         do {
             $total_games = Game::count();

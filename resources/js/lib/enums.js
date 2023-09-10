@@ -6,4 +6,5 @@ export const GameVersion = {
   'FIFA_2022': 'fifa_2022',
   'EFOOTBALL_2022': 'efootball_2022',
   'EFOOTBALL_2023': 'efootball_2023',
+  'EFOOTBALL_2024': 'efootball_2024',
 };

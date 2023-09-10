@@ -11,8 +11,14 @@
 
 Use docker compose to build the image and later run npm install and npm run dev for the front end
 
+## Create the Database
+
+- migrate command first
+
 ## About Martes de PES
 
 - The last thing is done was the Player Stats
 
 - Next Step is to check: Random, Libertadores and Sudamericana sections
+
+- Strikes

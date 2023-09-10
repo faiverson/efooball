@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\StrikeType;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -16,21 +17,16 @@ return new class extends Migration
                 ->onUpdate('cascade')->onDelete('cascade');
 
             $table->unsignedInteger('winning_strike')->default(0);
-            $table->unsignedInteger('undefeated_strike')->default(0);
             $table->unsignedInteger('loosing_strike')->default(0);
-            $table->unsignedInteger('defeated_strike')->default(0);
-            $table->unsignedInteger('last_game_id')->default(0);
-            $table->foreign('last_game_id')->references('id')->on('games')
-                ->onUpdate('cascade')->onDelete('cascade');
 
-            $table->unsignedInteger('current_strike');
-            $table->enum('last_game', ['win', 'win_draw', 'last_draw', 'lost']);
+            $table->unsignedInteger('strike')->nullable(true);
+            $table->enum('strike_type', StrikeType::getValues())->default(StrikeType::INIT);
 
-            $table->json('current_games')->nullable(true);
+            $table->json('games')->nullable(true);
             $table->json('winning_strikes_games')->nullable(true);
-            $table->json('undefeated_strikes_games')->nullable(true);
             $table->json('loosing_strikes_games')->nullable(true);
-            $table->json('defeated_strikes_games')->nullable(true);
+            $table->date('start_at');
+            $table->date('end_at')->nullable(true);
         });
     }
 
