@@ -1,14 +1,17 @@
 @tailwind base;
 
 :root {
-  --blue-light: #02027D;
-  --blue: #0909BD;
-  --blue-alternative: #04049A;
-  --blue-dark-alternative: #01015F;
-  --blue-dark: #00003A;
-  --yellow-light: #B3A200;
+  --blue-light: #08CAD6;
+  --blue: #0B7EA9;
+  --blue-alternative: #4880FE;
+  --blue-dark-alternative: #17294B;
+  --blue-dark: #09071C;
+  --violet: #8A32EA;
+  --violet-alternative: #C66EDA;
+  --violet-dark: #410380;
+  --violet-dark-alternative: #5C20B4;
+  --violet-light: #B494F8;
   --yellow: #FFE800;
-  --yellow-alternative: #DBC800;
   --yellow-dark-alternative: #887C00;
   --yellow-dark: #534C00;
   --orange-light: #B36600;

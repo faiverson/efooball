@@ -3,11 +3,12 @@ import axios from '@/lib/axios'
 import { DateTime } from 'luxon'
 import { Head } from '@inertiajs/react'
 import { Button, Input } from '@material-tailwind/react'
-import { GameVersion } from '@/lib/enums'
-import Filters from '@/Components/Filters'
+import {GameVersion} from '@/lib/enums'
+import GameVersionTags from '@/Components/GameVersionTags'
 import GuestLayout from '@/Layouts/GuestLayout';
+import Filters from "@/Components/Filters";
 
-export default function PlayerStats({data, current_version, start_at, end_at, min_amount}) {
+export default function TeamStats({ data, current_version, start_at, end_at, min_amount }) {
     const [stats, setStats] = useState(data ?? [])
     const [versions, setVersions] = useState(Object.keys(GameVersion).map(item => ({active: current_version === item.toLowerCase(), name: item})))
     const [minGames, setMinGames] = useState(min_amount)
@@ -52,7 +53,7 @@ export default function PlayerStats({data, current_version, start_at, end_at, mi
             filters += `&end_at=${until_at.toFormat('yyyy-MM-dd')}`;
         }
 
-        const response_players = await axios.get(`/player_stats${filters}`)
+        const response_players = await axios.get(`/team_stats${filters}`)
             .then(res => res.data)
             .catch(error => console.log(error));
 
@@ -61,14 +62,14 @@ export default function PlayerStats({data, current_version, start_at, end_at, mi
 
     return (
         <GuestLayout>
-            <Head><title>Player Stats</title></Head>
+            <Head><title>Team Stats</title></Head>
             <Filters inputs={{versions, minGames, from_at, until_at }}
-                     methods={{onChangeTag, onChangeMinGames, handleChange, onSubmit}} />
+                   methods={{onChangeTag, onChangeMinGames, handleChange, onSubmit}} />
             <div className="flex flex-row items-start">
                 <table className="pes-table">
                     <thead>
                     <tr>
-                    <th>Player</th>
+                    <th>Team</th>
                     <th>Games</th>
                     <th>Record</th>
                     <th>Percentage</th>

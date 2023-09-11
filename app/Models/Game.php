@@ -32,6 +32,6 @@ class Game extends Model
     public static function latestGames(): \Illuminate\Database\Eloquent\Builder
     {
       $latestDate = static::query()->max('played_at');
-      return static::query()->where('played_at', $latestDate);
+      return static::query()->where('played_at', $latestDate)->orderByDesc('id');
     }
 }

@@ -90,7 +90,7 @@ class PlayerController extends Controller
         }
 
         $query->groupBy(["$player_table.name", "$player_table.id"]);
-        $query->havingRaw('COUNT(`g`.`id`) > ?',  [$min_amount]);
+        $query->havingRaw('COUNT(`g`.`id`) >= ?',  [$min_amount]);
         $query->orderByRaw('average DESC');
         return $query;
     }

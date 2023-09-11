@@ -26,9 +26,17 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::get('random-teams', [TeamController::class, 'random_teams'])->name('random-teams');
 
-Route::get('players-stats', [PlayerController::class, 'stats'])->name('players-stats');
+Route::controller(TeamController::class)->group(function () {
+    Route::get('random-teams', 'random_teams')->name('random-teams');
+    Route::get('team-stats', 'stats')->name('team-stats');
+    Route::get('team-versus', 'versus')->name('team-versus');
+});
+
+Route::controller(PlayerController::class)->group(function () {
+    Route::get('players-stats', 'stats')->name('players-stats');
+    Route::get('players-versus', 'versus')->name('players-versus');
+});
 
 Route::controller(TournamentController::class)->group(function () {
     Route::get('/tournaments/libertadores', 'libertadores')->name('libertadores');

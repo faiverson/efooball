@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from '@/lib/axios'
 import GuestLayout from '@/Layouts/GuestLayout';
+import { Head } from '@inertiajs/react'
 import { Button, Chip } from '@material-tailwind/react';
 
 const PlayerChipType = {
@@ -37,6 +38,7 @@ export default function RandomTeams({ players }) {
         const selPlayers = new Set(type === PlayerChipType.head ? headSelected : tailSelected)
         selPlayers.has(player) ? selPlayers.delete(player) : selPlayers.add(player);
         type === PlayerChipType.head ? setHeadSelected(selPlayers) : setTailSelected(selPlayers)
+        setData([])
     }
 
     const onSubmit = async ev => {
@@ -49,13 +51,17 @@ export default function RandomTeams({ players }) {
             .catch(error => console.log(error));
 
         setData(response.data.teams)
+        setHeadSelected(new Set())
+        setTailSelected(new Set())
     }
 
     const head_players = Array.from(headSelected)
     const tail_players = Array.from(tailSelected)
 
+  console.log(data, head_players.length > 0 || tail_players.length > 0)
     return (
         <GuestLayout>
+            <Head><title>Random Teams</title></Head>
             <div className="container flex flex-wrap flex-column mt-8">
                 <div className="w-full m-8">
                     <h3 className="text-lg text-main-yellow">Select Head Players</h3>
@@ -79,24 +85,30 @@ export default function RandomTeams({ players }) {
                     </div>
                 </div>
                 <div className="w-full m-8">
+                  {data.length <= 0 && (head_players.length > 0 || tail_players.length > 0) &&
                     <div className="flex flex-wrap flex-col items-center mx-auto p-4 mt-4 bg-white rounded gap-4 w-fit border-2 border-orange-300">
-                        <div className="flex flex-wrap flex-row justify-start items-start gap-4">
-                            <div className="flex flex-col">
-                                <h4 className="text-lg text-main-blue font-bold">Head Selection</h4>
-                                <ul className="flex flex-col">
-                                    { head_players.map(player => <li className="text-main-blue" key={player.id}>{player.name}</li>) }
-                                </ul>
-                            </div>
-                            <div className="flex flex-col">
-                                <h4 className="text-lg text-main-blue font-bold">Tail Selection</h4>
-                                <ul className="flex flex-col">
-                                    { tail_players.map(player => <li key={player.id} className="text-main-blue">{player.name}</li>) }
-                                </ul>
-                            </div>
-                        </div>
-                        <Button onClick={onSubmit} variant="filled" color="yellow">Randomize</Button>
+                    <div className="flex flex-wrap flex-row justify-start items-start gap-4">
+                      <div className="flex flex-col">
+                        <h4 className="text-lg text-main-blue font-bold">Head Selection</h4>
+                        <ul className="flex flex-col">
+                          {head_players.map(player => <li className="text-main-blue"
+                                                          key={player.id}>{player.name}</li>)}
+                        </ul>
+                      </div>
+                      <div className="flex flex-col">
+                        <h4 className="text-lg text-main-blue font-bold">Tail Selection</h4>
+                        <ul className="flex flex-col">
+                          {tail_players.map(player => <li key={player.id}
+                                                          className="text-main-blue">{player.name}</li>)}
+                        </ul>
+                      </div>
                     </div>
-                    {!!data.length > 0 &&
+                    <Button onClick={onSubmit}
+                            disabled={head_players.length < 2 || head_players.length !== tail_players.length}
+                            variant="filled" color="yellow">Randomize</Button>
+                  </div>
+                  }
+                    {data.length > 0 &&
                     <div className="mx-auto mt-4 bg-white rounded border-2 border-orange-300 flex flex-wrap flex-col w-fit p-4">
                         <h4 className="text-lg text-main-blue font-bold">TEAMS CREATED</h4>
                         <ul className="flex flex-col">

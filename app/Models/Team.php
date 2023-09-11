@@ -39,6 +39,11 @@ class Team extends Model
         return $this->hasMany(Game::class, 'team_away_id');
     }
 
+    public function strikes(): hasMany
+    {
+        return $this->hasMany(TeamStrike::class, 'team_id');
+    }
+
     public function dates(string $start_at = null, string $end_at = null)
     {
       if($start_at) {

@@ -22,10 +22,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::controller(PlayerController::class)->group(function () {
     Route::get('/player_stats', 'api_stats');
+    Route::post('/player_versus', 'api_versus');
 });
 
 Route::controller(TeamController::class)->group(function () {
-    Route::get('/team_stats', 'stats');
-    Route::post('/random', 'random');
-    Route::post('/strikes', 'strikes');
+    Route::get('/team_stats', 'api_stats');
+    Route::post('/team_versus', 'api_versus');
+    Route::post('/random', 'api_random');
+    Route::post('/strikes', 'api_strikes');
 });

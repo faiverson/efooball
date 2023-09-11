@@ -9,6 +9,7 @@ use App\Models\Player;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -16,16 +17,67 @@ class TeamController extends Controller
 {
     public function stats(Request $request)
     {
-      $args = (object) [
-        'versions' => empty($request->versions) ? GameVersion::getValues() : array_map(fn($item) => GameVersion::getValue($item), explode(',', $request->versions)),
-        'start_at' => $request->start_at ?? '2018-03-27',
-        'end_at' => $request->end_at ?? now()->toDateString(),
-        'min_amount' => $request->min_amount ?? 10
-      ];
+        $current_version = config('filters.current_version');
+        $min_amount = config('filters.min_amount');
+        $start_at = config('filters.start_at');
+        $end_at = config('filters.end_at');
+        $query = $this->queryTeamStats([$current_version], $min_amount, $start_at, $end_at);
 
-      $query = $this->queryTeamStats($args->versions, $args->start_at, $args->end_at, $args->min_amount);
-      return Inertia::render('PlayerStats', ['data' => $query->get()]);
-//      return response()->json(['data' => $query->get()]);
+        return Inertia::render('TeamStats', [
+            'data' => $query->get(),
+            'current_version' => $current_version,
+            'start_at' => $start_at,
+            'end_at' => $end_at,
+            'min_amount' => $min_amount
+        ]);
+    }
+
+    public function versus(Request $request)
+    {
+        $current_version = config('filters.current_version');
+        $start_at = config('filters.start_at');
+        $end_at = config('filters.end_at');
+
+        return Inertia::render('TeamVersus', [
+            'teams' => Team::orderBy('name')->get(),
+            'current_version' => $current_version,
+            'start_at' => $start_at,
+            'end_at' => $end_at,
+        ]);
+    }
+
+    public function api_stats(Request $request)
+    {
+        $args = (object) [
+            'versions' => empty($request->versions) ? GameVersion::getValues() : array_map(fn($item) => GameVersion::getValue($item), explode(',', $request->versions)),
+            'start_at' => $request->start_at,
+            'end_at' => $request->end_at,
+            'min_amount' => $request->min_amount ?? 1
+        ];
+
+        $query = $this->queryTeamStats($args->versions, $args->min_amount, $args->start_at, $args->end_at);
+        return response()->json(['data' => $query->get()]);
+    }
+
+    public function api_versus(Request $request)
+    {
+        $args = (object) [
+            'first_team_id' => $request->first_team_id,
+            'second_team_id' => $request->second_team_id,
+            'versions' => empty($request->versions) ? GameVersion::getValues() : array_map(fn($item) => GameVersion::getValue($item), explode(',', $request->versions)),
+            'start_at' => $request->start_at,
+            'end_at' => $request->end_at,
+        ];
+
+        $query = $this->queryVersusStats($args->first_team_id, $args->second_team_id, $args->versions, $args->start_at, $args->end_at);
+        $query_total = $this->queryVersusTotalStats($args->first_team_id, $args->second_team_id, $args->versions, $args->start_at, $args->end_at);
+        $totals = $query_total->get();
+        return response()->json(['data' => [
+            'first_team' => Team::find($args->first_team_id),
+            'second_team' => Team::find($args->second_team_id),
+            'games' => $query->get(),
+            'totals' => $totals->first(),
+        ]]);
     }
 
     public function random_teams(Request $request)
@@ -33,7 +85,7 @@ class TeamController extends Controller
         return Inertia::render('RandomTeams', ['players' => Player::all()]);
     }
 
-    public function random(Request $request)
+    public function api_random(Request $request)
     {
         $strong = Player::whereIn('id', $request->head)->get() ?? collect();
         $weak = Player::whereIn('id', $request->tail)->get() ?? collect();
@@ -72,12 +124,12 @@ class TeamController extends Controller
         return response()->json(['data' => $response]);
     }
 
-    public function strikes(Request $request)
+    public function api_strikes(Request $request)
     {
         return 'not build';
     }
 
-    private function queryPlayerStats(array $versions, string $start_at = null, string $end_at = null, int $min_amount = 1): Builder
+    private function queryTeamStats(array $versions, int $min_amount, string $start_at = null, string $end_at = null): Builder
     {
         $query = DB::table('teams');
         $team_table = (new Team())->getTable();
@@ -109,6 +161,64 @@ class TeamController extends Controller
         $query->groupBy(["$team_table.name", "$team_table.id"]);
         $query->havingRaw('COUNT(`g`.`id`) >= ?',  [$min_amount]);
         $query->orderByRaw('average DESC');
+        return $query;
+    }
+
+    private function queryVersusStats(int $first_team_id, int $second_team_id, array $versions, string $start_at = null, string $end_at = null): Builder
+    {
+        $game_table = (new Game())->getTable();
+        $query = DB::table($game_table);
+        $query->where(function ($q) use($first_team_id, $second_team_id) {
+            $q->where(function ($q) use($first_team_id, $second_team_id) {
+                $q->where('team_home_id', $first_team_id)->where('team_away_id', $second_team_id);
+            })
+            ->orWhere(function ($q) use($first_team_id, $second_team_id) {
+                $q->where('team_home_id', $second_team_id)->where('team_away_id', $first_team_id);
+            });
+        });
+
+        if(! empty($versions)) {
+            $query->whereIn('version',  $versions);
+        }
+        if(!empty($start_at) && !empty($end_at)) {
+            $query->whereBetween('played_at', [$start_at, $end_at]);
+        }
+
+        $query->orderByDesc('id');
+        return $query;
+    }
+
+    private function queryVersusTotalStats(int $first_team_id, int $second_team_id, array $versions, string $start_at = null, string $end_at = null): Builder
+    {
+        $game_table = (new Game())->getTable();
+        $query = DB::table($game_table);
+
+        $query->selectRaw("COUNT(id) as total");
+        $query->selectRaw("SUM(CASE WHEN (team_home_id = $first_team_id AND team_home_score > team_away_score) THEN 1
+                                              WHEN (team_away_id = $first_team_id AND team_home_score < team_away_score) THEN 1
+                                              ELSE 0 END) as first_team_win");
+        $query->selectRaw("SUM(CASE WHEN team_home_score = team_away_score THEN 1 ELSE 0 END) as draw");
+        $query->selectRaw("SUM(CASE WHEN (team_home_id = $first_team_id AND team_home_score < team_away_score) THEN 1
+                                              WHEN (team_away_id = $first_team_id AND team_home_score > team_away_score) THEN 1
+                                              ELSE 0 END) as first_team_lost");
+
+        $query->where(function ($q) use($first_team_id, $second_team_id) {
+            $q->where(function ($q) use($first_team_id, $second_team_id) {
+                $q->where('team_home_id', $first_team_id)->where('team_away_id', $second_team_id);
+            })
+            ->orWhere(function ($q) use($first_team_id, $second_team_id) {
+                $q->where('team_home_id', $second_team_id)->where('team_away_id', $first_team_id);
+            });
+        });
+
+        if(! empty($versions)) {
+            $query->whereIn('version',  $versions);
+        }
+        if(!empty($start_at) && !empty($end_at)) {
+            $query->whereBetween('played_at', [$start_at, $end_at]);
+        }
+
+        $query->orderByDesc('id');
         return $query;
     }
 

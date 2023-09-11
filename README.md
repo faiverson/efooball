@@ -14,11 +14,31 @@ Use docker compose to build the image and later run npm install and npm run dev 
 ## Create the Database
 
 - migrate command first
+- run seeders (if you want truncate all data first, add env var RESET_DATABASE=true)
 
 ## About Martes de PES
 
-- The last thing is done was the Player Stats
+- The last thing is done was the Team Stats and 
 
-- Next Step is to check: Random, Libertadores and Sudamericana sections
+- Next Step is to check: 
+
+- Random: do the random and send to telegram
+
+- Libertadores and Sudamericana sections
 
 - Strikes
+
+- Team VS Teams stats
+
+- Add filter stats by tournament
+
+## FAQ
+
+What to do with new games?
+- Make sure RESET_DATABASE=false and run the db:seed --class=GameSeeder
+
+What to do with a new version of the game?
+- You need to update the next files:
+-- app/Enums/GameVersion.php
+-- config/filters.php
+-- resources/js/lib/enums.js

@@ -10,7 +10,7 @@ export default function Guest({ user, children }) {
           <ApplicationLogo />
           <div className="fixed top-0 right-0 px-6 py-4  sm:block">
             {!!user
-              ? <Link href={route('dashboard')} className="text-sm text-main-yellow underline">Dashboard</Link>
+              ? <Link href={route('dashboard')} className="text-sm text-main-violet underline">Dashboard</Link>
               :
               <>
                 <Link href={route('login')} className="text-sm text-main-yellow dark:text-alternative-yellow underline">Log in</Link>
@@ -20,11 +20,14 @@ export default function Guest({ user, children }) {
           </div>
         </header>
         <div className="container md:mx-auto flex gap-8 md:flex-column">
-          <Link href={route('home')} className="text-main-yellow dark:text-alternative-yellow">Home</Link>
-          <Link href={route('players-stats')} className="text-main-yellow dark:text-alternative-yellow">Player Stats</Link>
-          <Link href={route('random-teams')} className="text-main-yellow dark:text-alternative-yellow">Random</Link>
-          <Link href={route('libertadores')} className="text-main-yellow dark:text-alternative-yellow">Libertadores</Link>
-          <Link href={route('sudamericana')} className="text-main-yellow dark:text-alternative-yellow">Sudamericana</Link>
+          <Link href={route('home')} className="text-main-violet dark:text-alternative-violet">Home</Link>
+          <Link href={route('team-stats')} className="text-main-violet dark:text-alternative-violet">Team Stats</Link>
+          <Link href={route('team-versus')} className="text-main-violet dark:text-alternative-violet">Team Versus</Link>
+          <Link href={route('players-stats')} className="text-main-violet dark:text-alternative-violet">Player Stats</Link>
+          <Link href={route('players-versus')} className="text-main-violet dark:text-alternative-violet">Player Versus</Link>
+          <Link href={route('random-teams')} className="text-main-violet dark:text-alternative-violet">Random</Link>
+          <Link href={route('libertadores')} className="text-main-violet dark:text-alternative-violet">Libertadores</Link>
+          <Link href={route('sudamericana')} className="text-main-violet dark:text-alternative-violet">Sudamericana</Link>
         </div>
         <div className="container md:mx-auto flex md:flex-row mt-8">
           {children}
