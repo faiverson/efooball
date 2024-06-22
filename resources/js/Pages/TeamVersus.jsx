@@ -3,15 +3,18 @@ import axios from '@/lib/axios'
 import { DateTime } from 'luxon'
 import { Head } from '@inertiajs/react'
 import { GameVersion } from '@/lib/enums'
-import Filters from '@/Components/Filters'
+import TeamFilters from '@/Components/TeamFilters'
 import TeamDropdown from '@/Components/TeamDropdown'
 import GuestLayout from '@/Layouts/GuestLayout';
-import {Button} from "@material-tailwind/react";
+import { Button } from "@material-tailwind/react";
 
 export default function TeamVersus({ teams, current_version, start_at, end_at}) {
+  const local_teams = teams.map(team => ({...team, id: String(team.id), players: team.players.map(p => p.id)}));
+
     const [data, setData] = useState()
-    const [first_team, setFirstTeam] = useState(-1)
-    const [second_team, setSecondTeam] = useState(-1)
+    const [first_team, setFirstTeam] = useState('-1')
+    const [second_team, setSecondTeam] = useState('-1')
+    const [away_teams, setAwayTeams] = useState([])
     const [versions, setVersions] = useState(Object.keys(GameVersion).map(item => ({active: current_version === item.toLowerCase(), name: item})))
     const [from_at, setFromAt] = useState(DateTime.fromFormat(start_at, 'yyyy-MM-dd'))
     const [until_at, setUntilAt] = useState(DateTime.fromFormat(end_at, 'yyyy-MM-dd'))
@@ -61,26 +64,43 @@ export default function TeamVersus({ teams, current_version, start_at, end_at}) 
         setData(response?.data)
     }
 
-    console.log(data, first_team, second_team)
+    const handleLocalTeam = id => {
+      setFirstTeam(id)
+      const idx = local_teams.findIndex(item => item.id === id);
+      const away = local_teams.filter(team => !team.players.some(player_id => local_teams[idx].players.includes(player_id)))
+      setSecondTeam('-1')
+      setAwayTeams(away);
+    }
+
+    const handleAwayTeam = id => setSecondTeam(id);
 
     return (
         <GuestLayout>
             <Head><title>Team Head to Head</title></Head>
-            <Filters inputs={{versions, from_at, until_at }} methods={{onChangeTag, handleChange, onSubmit}} />
+            <div className="flex flex-col justify-start gap-2 md:flex-col p-2 md:w-80 md:p-8">
+              <TeamFilters inputs={{versions, from_at, until_at }} methods={{onChangeTag, handleChange}} />
+            </div>
             <div className="flex flex-col w-full">
               <div className="flex flex-row items-start gap-4 justify-center">
-                <div className="w-3/12"><TeamDropdown teams={teams} selected={{first_team}} onChange={val => setFirstTeam(val)} /></div>
-                <div className="w-3/12"><TeamDropdown teams={teams} selected={{second_team}} onChange={val => setSecondTeam(val)} /></div>
-                <div className="w-2/12"><Button onClick={onSubmit} variant="filled" color="orange">Okay</Button></div>
+                <div className="w-3/12"><TeamDropdown name="local_team" teams={local_teams} selected={first_team} onChange={handleLocalTeam} /></div>
+                <div className="w-3/12"><TeamDropdown name="away_team" teams={away_teams} selected={second_team} onChange={handleAwayTeam} /></div>
+                <div className="w-2/12"><Button onClick={onSubmit} variant="filled" color="yellow">Okay</Button></div>
               </div>
-              {!!data && data.totals.total > 0 &&
+              {!!data &&
                 <section className="flex flex-col gap-4 w-full mt-8">
-                  <div className="flex flex-row text-main-violet gap-2 text-xl w-full justify-center">
-                    <div>{data.first_team.name}</div>
-                    <div>{`${data.totals.first_team_win}-${data.totals.draw}-${data.totals.first_team_lost}`}</div>
-                    <div>{data.second_team.name}</div>
+                  <div className="flex flex-row text-main-yellow gap-2 text-xl w-full justify-center">
+                    {
+                      data.totals.total > 0
+                      ? <>
+                          <div>{data.first_team.name}</div>
+                          <div>{`${data.totals.first_team_win}-${data.totals.draw}-${data.totals.first_team_lost}`}</div>
+                          <div>{data.second_team.name}</div>
+                          </>
+                      : <div className="orange text-lg">No matches between {data.first_team.name} and {data.second_team.name}</div>
+                    }
+
                   </div>
-                  <div className="flex flex-col text-main-violet row-gap-2">
+                  <div className="flex flex-col text-main-yellow row-gap-2">
                     { data.games.map((item, i) => {
                       const {team_home_score, team_away_score, played_at} = item
                       return (
@@ -90,9 +110,6 @@ export default function TeamVersus({ teams, current_version, start_at, end_at}) 
                     }
                   </div>
                 </section>
-              }
-              { !!data && data.totals.total <= 0 &&
-                <div className="orange text-lg">No matches between {data.first_team.name} and {data.second_team.name}</div>
               }
             </div>
         </GuestLayout>

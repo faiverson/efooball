@@ -39,7 +39,7 @@ class TeamController extends Controller
         $end_at = config('filters.end_at');
 
         return Inertia::render('TeamVersus', [
-            'teams' => Team::orderBy('name')->get(),
+            'teams' => Team::has('matches')->with('players')->orderBy('name')->get(),
             'current_version' => $current_version,
             'start_at' => $start_at,
             'end_at' => $end_at,
@@ -56,6 +56,7 @@ class TeamController extends Controller
         ];
 
         $query = $this->queryTeamStats($args->versions, $args->min_amount, $args->start_at, $args->end_at);
+
         return response()->json(['data' => $query->get()]);
     }
 
@@ -156,7 +157,13 @@ class TeamController extends Controller
         });
 
         $query->whereIn('g.version',  $versions);
-        $query->whereBetween('g.played_at', [$start_at, $end_at]);
+        if($start_at && $end_at) {
+            $query->whereBetween('g.played_at', [$start_at, $end_at]);
+        } else if($start_at && !$end_at) {
+            $query->where('g.played_at', '>=', $start_at);
+        } else if(!$start_at && $end_at) {
+            $query->where('g.played_at', '<=', $end_at);
+        }
 
         $query->groupBy(["$team_table.name", "$team_table.id"]);
         $query->havingRaw('COUNT(`g`.`id`) >= ?',  [$min_amount]);

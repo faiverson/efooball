@@ -2,14 +2,17 @@ import React, { useState } from 'react'
 import axios from '@/lib/axios'
 import { DateTime } from 'luxon'
 import { Head } from '@inertiajs/react'
-import { Button, Input } from '@material-tailwind/react'
-import { GameVersion } from '@/lib/enums'
-import Filters from '@/Components/Filters'
+import { Button } from '@material-tailwind/react'
+import { GameVersion, TournamentType } from '@/lib/enums'
+import TeamFilters from '@/Components/TeamFilters'
+import SingleFilters from '@/Components/SingleFilters'
 import GuestLayout from '@/Layouts/GuestLayout';
 
 export default function PlayerStats({data, current_version, start_at, end_at, min_amount}) {
-    const [stats, setStats] = useState(data ?? [])
+    const [singleStats, setSingleStats] = useState(data.single_stats ?? [])
+    const [teamStats, setTeamStats] = useState(data.team_stats ?? [])
     const [versions, setVersions] = useState(Object.keys(GameVersion).map(item => ({active: current_version === item.toLowerCase(), name: item})))
+    const [tournamentTypes, setTournamentsTypes] = useState(Object.keys(TournamentType).map(item => ({active: true, name: item})))
     const [minGames, setMinGames] = useState(min_amount)
     const [from_at, setFromAt] = useState(DateTime.fromFormat(start_at, 'yyyy-MM-dd'))
     const [until_at, setUntilAt] = useState(DateTime.fromFormat(end_at, 'yyyy-MM-dd'))
@@ -37,9 +40,17 @@ export default function PlayerStats({data, current_version, start_at, end_at, mi
       }
     }
 
+    const onChangeModality = tag => {
+      const newTournamentType = [...tournamentTypes]
+      const idx = newTournamentType.findIndex(item => item.name === tag)
+      newTournamentType[idx].active = !newTournamentType[idx].active
+      setTournamentsTypes(newTournamentType)
+  }
+
     const onSubmit = async ev => {
         ev.preventDefault()
         let filters = `?versions=${versions.filter(item => item.active).map(item => item.name).join(',')}`;
+        filters += `&modality=${tournamentTypes.filter(item => item.active).map(item => item.name).join(',')}`;
         if(!!minGames) {
             filters += `&min_amount=${minGames}`;
         }
@@ -56,14 +67,21 @@ export default function PlayerStats({data, current_version, start_at, end_at, mi
             .then(res => res.data)
             .catch(error => console.log(error));
 
-        setStats(response_players?.data)
+        setSingleStats(response_players?.data.single_stats);
+        setTeamStats(response_players?.data.team_stats);
     }
 
     return (
         <GuestLayout>
             <Head><title>Player Stats</title></Head>
-            <Filters inputs={{versions, minGames, from_at, until_at }}
-                     methods={{onChangeTag, onChangeMinGames, handleChange, onSubmit}} />
+
+            <div className="flex flex-col justify-start gap-2 md:flex-col p-2 md:w-80 md:p-8">
+              <TeamFilters inputs={{versions, minGames, from_at, until_at, tournamentTypes }}
+                            methods={{onChangeTag, onChangeMinGames, handleChange}} />
+              <SingleFilters inputs={{tournamentTypes }}
+                            methods={{onChangeModality}} />
+              <Button onClick={onSubmit} variant="filled" color="yellow">Apply Filter</Button>
+            </div>
             <div className="flex flex-row items-start">
                 <table className="pes-table">
                     <thead>
@@ -75,7 +93,32 @@ export default function PlayerStats({data, current_version, start_at, end_at, mi
                     </tr>
                     </thead>
                     <tbody>
-                    { stats.map((item, i) => {
+                    { teamStats.map((item, i) => {
+                            const {name, win, draw, lost, average, total} = item
+                            const record = `${win}-${draw}-${lost}`
+                            return (
+                            <tr key={i} className="text-center">
+                                <td>{name}</td>
+                                <td>{total}</td>
+                                <td>{record}</td>
+                                <td>{average ?? 0}%</td>
+                            </tr>
+                            )
+                        })
+                    }
+                    </tbody>
+                </table>
+                <table className="pes-table">
+                    <thead>
+                    <tr>
+                    <th>Player</th>
+                    <th>Games</th>
+                    <th>Record</th>
+                    <th>Percentage</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    { singleStats.map((item, i) => {
                             const {name, win, draw, lost, average, total} = item
                             const record = `${win}-${draw}-${lost}`
                             return (

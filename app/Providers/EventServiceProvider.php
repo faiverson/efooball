@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Models\Game;
+use App\Models\SingleGame;
+use App\Observers\PlayerStrikeObserver;
 use App\Observers\TeamStrikeObserver;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -28,6 +30,7 @@ class EventServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Game::observe(TeamStrikeObserver::class);
+        SingleGame::observe(PlayerStrikeObserver::class);
     }
 
     /**

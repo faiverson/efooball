@@ -2,11 +2,10 @@ import React, { useState } from 'react'
 import axios from '@/lib/axios'
 import { DateTime } from 'luxon'
 import { Head } from '@inertiajs/react'
-import { Button, Input } from '@material-tailwind/react'
+import { Button } from '@material-tailwind/react'
 import {GameVersion} from '@/lib/enums'
-import GameVersionTags from '@/Components/GameVersionTags'
 import GuestLayout from '@/Layouts/GuestLayout';
-import Filters from "@/Components/Filters";
+import TeamFilters from "@/Components/TeamFilters";
 
 export default function TeamStats({ data, current_version, start_at, end_at, min_amount }) {
     const [stats, setStats] = useState(data ?? [])
@@ -27,14 +26,11 @@ export default function TeamStats({ data, current_version, start_at, end_at, min
         setMinGames(ev.target.value)
     }
 
-    const handleChange = (ev, field) => {
-      ev.preventDefault()
-      let value = ev.target.value;
-      const date = value ? DateTime.fromFormat(value, 'yyyy-MM-dd') : null
+    const handleChange = (value, field) => {
       if(field === 'from_at') {
-        setFromAt(date)
+        setFromAt(value)
       } else if(field === 'until_at') {
-        setUntilAt(date)
+        setUntilAt(value ? DateTime.fromJSDate(value) : null)
       }
     }
 
@@ -63,35 +59,40 @@ export default function TeamStats({ data, current_version, start_at, end_at, min
     return (
         <GuestLayout>
             <Head><title>Team Stats</title></Head>
-            <Filters inputs={{versions, minGames, from_at, until_at }}
-                   methods={{onChangeTag, onChangeMinGames, handleChange, onSubmit}} />
-            <div className="flex flex-row items-start">
-                <table className="pes-table">
-                    <thead>
-                    <tr>
-                    <th>Team</th>
-                    <th>Games</th>
-                    <th>Record</th>
-                    <th>Percentage</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    { stats.map((item, i) => {
-                            const {name, win, draw, lost, average, total} = item
-                            const record = `${win}-${draw}-${lost}`
-                            return (
-                            <tr key={i} className="text-center">
-                                <td>{name}</td>
-                                <td>{total}</td>
-                                <td>{record}</td>
-                                <td>{average ?? 0}%</td>
-                            </tr>
-                            )
-                        })
-                    }
-                    </tbody>
-                </table>
+            <div className="flex flex-col justify-start gap-2 md:flex-col p-2 md:w-80 md:p-8">
+              <TeamFilters inputs={{versions, minGames, from_at, until_at }}
+                          methods={{onChangeTag, onChangeMinGames, handleChange}} />
+              <Button onClick={onSubmit} variant="filled" color="yellow">Apply Filter</Button>
             </div>
+          { stats.length > 0 &&
+            <div className="flex flex-row items-start">
+              <table className="pes-table rounded">
+                <thead>
+                <tr>
+                  <th>Team</th>
+                  <th>Games</th>
+                  <th>Record</th>
+                  <th>Percentage</th>
+                </tr>
+                </thead>
+                <tbody>
+                {stats.map((item, i) => {
+                  const {name, win, draw, lost, average, total} = item
+                  const record = `${win}-${draw}-${lost}`
+                  return (
+                    <tr key={i} className="text-center">
+                      <td>{name}</td>
+                      <td>{total}</td>
+                      <td>{record}</td>
+                      <td>{average ?? 0}%</td>
+                    </tr>
+                  )
+                })
+                }
+                </tbody>
+              </table>
+            </div>
+          }
         </GuestLayout>
     );
 }

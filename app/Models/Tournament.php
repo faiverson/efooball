@@ -28,6 +28,11 @@ class Tournament extends Model
 
     protected $guarded = [];
 
+    public function scopeAmistoso(Builder $query): Builder
+    {
+        return $query->where('type', TournamentType::AMISTOSO);
+    }
+
     public function scopeLibertadores(Builder $query): Builder
     {
         return $query->where('type', TournamentType::LIBERTADORES);
@@ -36,6 +41,17 @@ class Tournament extends Model
     public function scopeSudamericana(Builder $query): Builder
     {
         return $query->where('type', TournamentType::SUDAMERICANA);
+    }
+
+
+    public function scopeTorneo(Builder $query): Builder
+    {
+        return $query->where('type', TournamentType::TORNEO);
+    }
+
+    public function scopeCopa(Builder $query): Builder
+    {
+        return $query->where('type', TournamentType::COPA);
     }
 
     protected function positions(): Attribute

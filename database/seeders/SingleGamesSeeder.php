@@ -4,8 +4,8 @@ namespace Database\Seeders;
 
 use App\Enums\GameType;
 use App\Enums\TournamentType;
-use App\Models\Game;
-use App\Models\Team;
+use App\Models\Player;
+use App\Models\SingleGame;
 use App\Models\Tournament;
 use Carbon\Carbon;
 use Illuminate\Console\View\Components\TwoColumnDetail;
@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use PulkitJalan\Google\Facades\Google;
 
-class GamesSeeder extends Seeder
+class SingleGamesSeeder extends Seeder
 {
     const CHUNK = 250;
 
@@ -29,16 +29,16 @@ class GamesSeeder extends Seeder
         if(env('RESET_DATABASE')) {
             Schema::disableForeignKeyConstraints();
             DB::table('tournaments')->truncate();
-            DB::table('team_strikes')->truncate();
-            DB::table('games')->truncate();
+            DB::table('single_strikes')->truncate();
+            DB::table('single_games')->truncate();
             Schema::enableForeignKeyConstraints();
         }
 
         do {
-            $total_games = Game::count();
+            $total_games = SingleGame::count();
             $from_row = $total_games + 2; // because should start +1 but the first row is a title, so it is 1 + 1 = 2
             $to_row = $from_row + self::CHUNK - 1;
-            $range = "martes!B{$from_row}:I{$to_row}";
+            $range = "individual!B{$from_row}:I{$to_row}";
             $response = $sheets->spreadsheets_values->get($spreadsheetId, $range);
             $rows = $response->getValues();
             $this->createGames($rows);
@@ -50,38 +50,35 @@ class GamesSeeder extends Seeder
         $t_id = 0;
         $date_at = null;
         foreach ($rows as $row) {
-            [$date, $home, $team_home_score, $team_away_score, $away, $winner, $version, $tournament] = $row + [7 => ''];
-            if(empty($home) && empty($away)) {
+            [$date, $p_home, $home_score, $away_score, $p_away, $winner, $version, $tournament] = $row + [7 => ''];
+            if(empty($p_home) && empty($p_away)) {
                 return false;
             }
 
             if(empty($date) && empty($date_at)) {
-              $date_at = Carbon::createFromFormat('Y-m-d', Game::max('played_at'));
+              $date_at = Carbon::createFromFormat('Y-m-d', SingleGame::max('played_at'));
             } elseif(!empty($date)) {
               $date_at = Carbon::createFromFormat('M d, Y', $date);
             }
 
-            $players = explode('/', $home);
-            sort($players);
-            $home = Team::where('name', "{$players[0]}-{$players[1]}")->first();
-            $players = explode('/', $away);
-            sort($players);
-            $away = Team::where('name', "{$players[0]}-{$players[1]}")->first();
+            $home = Player::where('name', trim($p_home))->first();
+            $away = Player::where('name', trim($p_away))->first();
             if(empty($home) || empty($away)) {
-              $this->command->error('Missing teams', $row);
-              throw new \Exception('Missing Team');
+              $this->command->error('Missing players', $row);
+              throw new \Exception('Missing Player');
             }
 
             try {
                 $type = $tournament ? strtolower($tournament) : TournamentType::AMISTOSO;
-                $game = Game::create([
-                    'team_home_id' => $home->id,
-                    'team_away_id' => $away->id,
-                    'team_home_score' => $team_home_score,
-                    'team_away_score'=> $team_away_score,
+                $game_version = Str::replace(' ', '_', strtolower($version));
+                $game = SingleGame::create([
+                    'home_id' => $home->id,
+                    'away_id' => $away->id,
+                    'home_score' => $home_score,
+                    'away_score'=> $away_score,
                     'type'=> $type,
-                    'version'=> Str::replace(' ', '_', strtolower($version)),
-                    'result'=> $team_home_score >= $team_away_score ? ($team_home_score > $team_away_score ? 'home' : 'draw')  : 'away',
+                    'version'=> $game_version,
+                    'result'=> $home_score >= $away_score ? ($home_score > $away_score ? 'home' : 'draw')  : 'away',
                     'played_at'=> $date_at->format('Y-m-d'),
                 ]);
 
@@ -91,10 +88,10 @@ class GamesSeeder extends Seeder
                     $selTournament = Tournament::firstOrCreate(
                         [
                             'name'=> "$tournament $ordinal",
-                            'game_type'=> GameType::TEAM,
+                            'game_type'=> GameType::SINGLE,
                             'type'=> $type,
                             'played_at'=> $date_at->format('Y-m-d'),
-                            'version'=> Str::replace(' ', '_', strtolower($version)),
+                            'version'=> $game_version,
                         ]
                     );
 
@@ -120,7 +117,7 @@ class GamesSeeder extends Seeder
             }
 
             with(new TwoColumnDetail($this->command->getOutput()))->render(
-                "{$game->teamHome->name} {$game->team_home_score}-{$game->team_away_score} {$game->teamAway->name} ({$game->played_at})",
+                "{$game->home->name} {$game->home_score}-{$game->away_score} {$game->away->name} ({$game->played_at})",
                 '<fg=green;options=bold>Game ID: ' . $game->id .'</>'
             );
         }
@@ -142,32 +139,32 @@ class GamesSeeder extends Seeder
 
     private function calculateTournamentPosition($games)
     {
-        $eloquentGames = Game::with(['teamHome', 'teamAway'])->whereIntegerInRaw('id', $games->toArray())->get();
+        $eloquentGames = SingleGame::with(['home', 'away'])->whereIntegerInRaw('id', $games->toArray())->get();
         return $eloquentGames->reduce(function ($positions, $game) {
-            if(!array_key_exists($game->teamHome->id, $positions)) {
-                $positions[$game->teamHome->id] = (object)['TEAM' => $game->teamHome->name, 'POINTS' => 0, 'GP' => 0, 'W' => 0, 'D' => 0, 'L' => 0, 'GF' => 0, 'GC' => 0, 'DIF' => 0];;
+            if(!array_key_exists($game->home->id, $positions)) {
+                $positions[$game->home->id] = (object)['PLAYER' => $game->home->name, 'POINTS' => 0, 'GP' => 0, 'W' => 0, 'D' => 0, 'L' => 0, 'GF' => 0, 'GC' => 0, 'DIF' => 0];;
             }
-            if(!array_key_exists($game->teamAway->id, $positions)) {
-                $positions[$game->teamAway->id] = (object)['TEAM' => $game->teamAway->name, 'POINTS' => 0, 'GP' => 0, 'W' => 0, 'D' => 0, 'L' => 0, 'GF' => 0, 'GC' => 0, 'DIF' => 0];;
+            if(!array_key_exists($game->away->id, $positions)) {
+                $positions[$game->away->id] = (object)['PLAYER' => $game->away->name, 'POINTS' => 0, 'GP' => 0, 'W' => 0, 'D' => 0, 'L' => 0, 'GF' => 0, 'GC' => 0, 'DIF' => 0];;
             }
 
-            $local = $positions[$game->teamHome->id];
-            $away = $positions[$game->teamAway->id];
+            $local = $positions[$game->home->id];
+            $away = $positions[$game->away->id];
 
             $local->GP += 1;
-            $local->GF += $game->team_home_score;
-            $local->GC += $game->team_away_score;
-            $local->DIF += ($game->team_home_score - $game->team_away_score);
+            $local->GF += $game->home_score;
+            $local->GC += $game->away_score;
+            $local->DIF += ($game->home_score - $game->away_score);
             $away->GP += 1;
-            $away->GF += $game->team_away_score;
-            $away->GC += $game->team_home_score;
-            $away->DIF += ($game->team_away_score - $game->team_home_score);
+            $away->GF += $game->away_score;
+            $away->GC += $game->home_score;
+            $away->DIF += ($game->away_score - $game->home_score);
 
-            if($game->team_home_score > $game->team_away_score) {
+            if($game->home_score > $game->away_score) {
                 $local->POINTS += 3;
                 $local->W += 1;
                 $away->L += 1;
-            } elseif($game->team_home_score === $game->team_away_score) {
+            } elseif($game->home_score === $game->away_score) {
                 $local->POINTS += 1;
                 $away->POINTS += 1;
                 $local->D += 1;

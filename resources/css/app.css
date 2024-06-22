@@ -48,6 +48,7 @@
 
   .background-primary {
     background-color: theme('colors.main-blue');
+    color: var(--white);
   }
 
   .background-dark {
@@ -58,7 +59,7 @@
     border: 0;
     color: var(--white);
     background-color: theme('colors.blue-alternative');
-    margin-bottom: 1rem;
+    margin-bottom: .5rem;
     border-collapse: collapse;
     box-sizing: border-box;
     display: table;
@@ -67,22 +68,22 @@
 
   .pes-table thead th {
     border: none;
-    padding: 20px 40px;
-    font-size: 15px;
-    border-bottom: 4px solid var(--yellow);
+    padding: 1rem 1.5rem;
+    font-size: .9rem;
+    border-bottom: 2px solid var(--yellow);
     vertical-align: bottom;
     color: var(--yellow-alternative);
   }
 
   .pes-table tbody tr {
-    margin-bottom: 10px;
+    margin-bottom: .5rem;
   }
 
   .pes-table tbody th, .pes-table tbody td {
     border: none;
-    padding: 20px 30px;
-    border-bottom: 3px solid var(--yellow-alternative);
-    font-size: 14px;
+    padding: .5rem 1rem;
+    border-bottom: 1px solid var(--yellow-alternative);
+    font-size: .9rem;
   }
 }
 
