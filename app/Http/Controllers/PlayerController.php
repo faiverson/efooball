@@ -37,6 +37,22 @@ class PlayerController extends Controller
             'min_amount' => $min_amount
         ]);
     }
+    public function versus(Request $request)
+    {
+        $current_version = config('filters.current_version');
+        $min_amount = config('filters.min_amount');
+        $start_at = config('filters.start_at');
+        $end_at = config('filters.end_at');
+        $modality = config('filters.modality');
+
+        return Inertia::render('PlayerVersus', [
+            'players' => Player::has('matches')->orderBy('name')->get(),
+            'current_version' => $current_version,
+            'start_at' => $start_at,
+            'end_at' => $end_at,
+        ]);
+
+    }
 
     public function api_stats(Request $request)
     {
@@ -55,6 +71,37 @@ class PlayerController extends Controller
                 'single_stats' => $query2->get(),
             ]
         ]);
+    }
+
+    public function api_versus(Request $request)
+    {
+        $args = (object) [
+            'first_player_id' => $request->first_player_id,
+            'second_player_id' => $request->second_player_id,
+            'versions' => empty($request->versions) ? GameVersion::getValues() : array_map(fn($item) => GameVersion::getValue($item), explode(',', $request->versions)),
+            'start_at' => $request->start_at,
+            'end_at' => $request->end_at,
+            'modality' => empty($request->modality) ? TournamentType::getValues() : array_map(fn($item) => TournamentType::getValue($item), explode(',', $request->modality)),
+        ];
+
+        $query = $this->queryVersusStats($args->first_team_id, $args->second_team_id, $args->versions, $args->start_at, $args->end_at);
+        $query_total = $this->queryVersusTotalStats($args->first_team_id, $args->second_team_id, $args->versions, $args->start_at, $args->end_at);
+        $totals = $query_total->get();
+        return response()->json(['data' => [
+            // 'team_stats' => [
+            //     'first_player' => Team::find($args->first_player_id),
+            // 'second_player' => Team::find($args->second_player_id),
+            // 'games' => $query->get(),
+            // 'totals' => $totals->first(),
+            // ],
+            // 'single_stats' => [
+            //     'first_player' => Team::find($args->first_player_id),
+            //     'second_player' => Team::find($args->second_player_id),
+            //     'games' => $query->get(),
+            //     'totals' => $totals->first(),
+            // ]
+
+        ]]);
     }
 
     private function queryTeamStats(array $versions, int $min_amount, string $start_at = null, string $end_at = null, $modality = []): Builder
@@ -157,6 +204,30 @@ class PlayerController extends Controller
         $query->groupBy(["$player_table.name", "$player_table.id"]);
         $query->havingRaw('COUNT(`g`.`id`) >= ?',  [$min_amount]);
         $query->orderByRaw('average DESC');
+        return $query;
+    }
+
+    private function queryVersusStats(int $first_team_id, int $second_team_id, array $versions, string $start_at = null, string $end_at = null): Builder
+    {
+        $game_table = (new Game())->getTable();
+        $query = DB::table($game_table);
+        $query->where(function ($q) use($first_team_id, $second_team_id) {
+            $q->where(function ($q) use($first_team_id, $second_team_id) {
+                $q->where('team_home_id', $first_team_id)->where('team_away_id', $second_team_id);
+            })
+            ->orWhere(function ($q) use($first_team_id, $second_team_id) {
+                $q->where('team_home_id', $second_team_id)->where('team_away_id', $first_team_id);
+            });
+        });
+
+        if(! empty($versions)) {
+            $query->whereIn('version',  $versions);
+        }
+        if(!empty($start_at) && !empty($end_at)) {
+            $query->whereBetween('played_at', [$start_at, $end_at]);
+        }
+
+        $query->orderByDesc('id');
         return $query;
     }
 

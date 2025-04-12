@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\GameVersion;
+use App\Enums\TournamentType;
 use App\Models\Game;
 use App\Models\Team;
 use App\Models\Player;
@@ -52,10 +53,11 @@ class TeamController extends Controller
             'versions' => empty($request->versions) ? GameVersion::getValues() : array_map(fn($item) => GameVersion::getValue($item), explode(',', $request->versions)),
             'start_at' => $request->start_at,
             'end_at' => $request->end_at,
-            'min_amount' => $request->min_amount ?? 1
+            'min_amount' => $request->min_amount ?? 1,
+            'modality' => empty($request->modality) ? TournamentType::getValues() : array_map(fn($item) => TournamentType::getValue($item), explode(',', $request->modality)),
         ];
 
-        $query = $this->queryTeamStats($args->versions, $args->min_amount, $args->start_at, $args->end_at);
+        $query = $this->queryTeamStats($args->versions, $args->min_amount, $args->start_at, $args->end_at, $args->modality);
 
         return response()->json(['data' => $query->get()]);
     }
@@ -68,10 +70,11 @@ class TeamController extends Controller
             'versions' => empty($request->versions) ? GameVersion::getValues() : array_map(fn($item) => GameVersion::getValue($item), explode(',', $request->versions)),
             'start_at' => $request->start_at,
             'end_at' => $request->end_at,
+            'modality' => empty($request->modality) ? TournamentType::getValues() : array_map(fn($item) => TournamentType::getValue($item), explode(',', $request->modality)),
         ];
 
-        $query = $this->queryVersusStats($args->first_team_id, $args->second_team_id, $args->versions, $args->start_at, $args->end_at);
-        $query_total = $this->queryVersusTotalStats($args->first_team_id, $args->second_team_id, $args->versions, $args->start_at, $args->end_at);
+        $query = $this->queryVersusStats($args->first_team_id, $args->second_team_id, $args->versions, $args->start_at, $args->end_at, $args->modality);
+        $query_total = $this->queryVersusTotalStats($args->first_team_id, $args->second_team_id, $args->versions, $args->start_at, $args->end_at, $args->modality);
         $totals = $query_total->get();
         return response()->json(['data' => [
             'first_team' => Team::find($args->first_team_id),
@@ -130,7 +133,7 @@ class TeamController extends Controller
         return 'not build';
     }
 
-    private function queryTeamStats(array $versions, int $min_amount, string $start_at = null, string $end_at = null): Builder
+    private function queryTeamStats(array $versions, int $min_amount, string $start_at = null, string $end_at = null, $modality = null): Builder
     {
         $query = DB::table('teams');
         $team_table = (new Team())->getTable();
@@ -165,13 +168,17 @@ class TeamController extends Controller
             $query->where('g.played_at', '<=', $end_at);
         }
 
+        if(! empty($modality)) {
+            $query->whereIn('g.type', $modality);
+        }
+
         $query->groupBy(["$team_table.name", "$team_table.id"]);
         $query->havingRaw('COUNT(`g`.`id`) >= ?',  [$min_amount]);
         $query->orderByRaw('average DESC');
         return $query;
     }
 
-    private function queryVersusStats(int $first_team_id, int $second_team_id, array $versions, string $start_at = null, string $end_at = null): Builder
+    private function queryVersusStats(int $first_team_id, int $second_team_id, array $versions, string $start_at = null, string $end_at = null, $modality = null): Builder
     {
         $game_table = (new Game())->getTable();
         $query = DB::table($game_table);
@@ -195,7 +202,7 @@ class TeamController extends Controller
         return $query;
     }
 
-    private function queryVersusTotalStats(int $first_team_id, int $second_team_id, array $versions, string $start_at = null, string $end_at = null): Builder
+    private function queryVersusTotalStats(int $first_team_id, int $second_team_id, array $versions, string $start_at = null, string $end_at = null, $modality = null): Builder
     {
         $game_table = (new Game())->getTable();
         $query = DB::table($game_table);
@@ -221,6 +228,11 @@ class TeamController extends Controller
         if(! empty($versions)) {
             $query->whereIn('version',  $versions);
         }
+
+        if(! empty($modality)) {
+            $query->whereIn('type', $modality);
+        }
+
         if(!empty($start_at) && !empty($end_at)) {
             $query->whereBetween('played_at', [$start_at, $end_at]);
         }

@@ -1,92 +1,89 @@
 @tailwind base;
-
-:root {
-  --blue-light: #08CAD6;
-  --blue: #0B7EA9;
-  --blue-alternative: #4880FE;
-  --blue-dark-alternative: #17294B;
-  --blue-dark: #09071C;
-  --violet: #8A32EA;
-  --violet-alternative: #C66EDA;
-  --violet-dark: #410380;
-  --violet-dark-alternative: #5C20B4;
-  --violet-light: #B494F8;
-  --yellow: #FFE800;
-  --yellow-dark-alternative: #887C00;
-  --yellow-dark: #534C00;
-  --orange-light: #B36600;
-  --orange: #FF9200;
-  --orange-alternative: #DB7E00;
-  --orange-dark-alternative: #884E00;
-  --orange-dark: #533000;
-  --xl: 1280px;
-}
+@tailwind components;
+@tailwind utilities;
 
 @layer base {
-  @font-face {
-    font-family: "eFootball Stencil";
-    src: url('fonts/eFootballStencil-Regular.woff') format('woff');
-  }
-  @font-face {
-    font-family: "eFootball Sans";
-    src: url('fonts/eFootballSans-Regular.woff') format('woff');
-  }
+    :root {
+        /* Primary Colors - Blue */
+        --color-primary-50: #f0f9ff;
+        --color-primary-100: #e0f2fe;
+        --color-primary-200: #bae6fd;
+        --color-primary-300: #7dd3fc;
+        --color-primary-400: #38bdf8;
+        --color-primary-500: #0ea5e9;
+        --color-primary-600: #0284c7;
+        --color-primary-700: #0369a1;
+        --color-primary-800: #075985;
+        --color-primary-900: #0c4a6e;
+        --color-primary-950: #082f49;
 
-  body {
-    font-family: "eFootball Sans", sans-serif;
-    background-color: theme('colors.blue-dark');
-    color: theme('colors.main-yellow');
-  }
+        /* Secondary Colors - Purple */
+        --color-secondary-50: #faf5ff;
+        --color-secondary-100: #f3e8ff;
+        --color-secondary-200: #e9d5ff;
+        --color-secondary-300: #d8b4fe;
+        --color-secondary-400: #c084fc;
+        --color-secondary-500: #a855f7;
+        --color-secondary-600: #9333ea;
+        --color-secondary-700: #7e22ce;
+        --color-secondary-800: #6b21a8;
+        --color-secondary-900: #581c87;
+        --color-secondary-950: #3b0764;
 
-  .container {
-    min-width: var(--xl);
-  }
+        /* Accent Colors - Yellow */
+        --color-accent-50: #fefce8;
+        --color-accent-100: #fef9c3;
+        --color-accent-200: #fef08a;
+        --color-accent-300: #fde047;
+        --color-accent-400: #facc15;
+        --color-accent-500: #eab308;
+        --color-accent-600: #ca8a04;
+        --color-accent-700: #a16207;
+        --color-accent-800: #854d0e;
+        --color-accent-900: #713f12;
+        --color-accent-950: #422006;
 
-  header {
-    box-sizing: content-box;
-  }
-
-  .background-primary {
-    background-color: theme('colors.main-blue');
-    color: var(--white);
-  }
-
-  .background-dark {
-    background-color: theme('colors.blue-dark');
-  }
-
-  .pes-table {
-    border: 0;
-    color: var(--white);
-    background-color: theme('colors.blue-alternative');
-    margin-bottom: .5rem;
-    border-collapse: collapse;
-    box-sizing: border-box;
-    display: table;
-    border-spacing: 2px;
-  }
-
-  .pes-table thead th {
-    border: none;
-    padding: 1rem 1.5rem;
-    font-size: .9rem;
-    border-bottom: 2px solid var(--yellow);
-    vertical-align: bottom;
-    color: var(--yellow-alternative);
-  }
-
-  .pes-table tbody tr {
-    margin-bottom: .5rem;
-  }
-
-  .pes-table tbody th, .pes-table tbody td {
-    border: none;
-    padding: .5rem 1rem;
-    border-bottom: 1px solid var(--yellow-alternative);
-    font-size: .9rem;
-  }
+        /* Neutral Colors - Gray */
+        --color-neutral-50: #f8fafc;
+        --color-neutral-100: #f1f5f9;
+        --color-neutral-200: #e2e8f0;
+        --color-neutral-300: #cbd5e1;
+        --color-neutral-400: #94a3b8;
+        --color-neutral-500: #64748b;
+        --color-neutral-600: #475569;
+        --color-neutral-700: #334155;
+        --color-neutral-800: #1e293b;
+        --color-neutral-900: #0f172a;
+        --color-neutral-950: #020617;
+    }
 }
 
-@tailwind components;
+@layer components {
+    .btn {
+        @apply px-4 py-2 rounded-lg transition-all duration-200 font-medium whitespace-nowrap;
+    }
 
-@tailwind utilities;
+    .btn-primary {
+        @apply bg-primary-600 text-white hover:bg-primary-700;
+    }
+
+    .btn-secondary {
+        @apply bg-secondary-600 text-white hover:bg-secondary-700;
+    }
+
+    .btn-accent {
+        @apply bg-accent-500 text-neutral-900 hover:bg-accent-600;
+    }
+
+    .card {
+        @apply bg-white rounded-lg shadow-md p-6;
+    }
+
+    .input {
+        @apply w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+    }
+
+    .label {
+        @apply block text-sm font-medium text-neutral-700 mb-1;
+    }
+}

@@ -8,6 +8,7 @@ export const GameVersion = {
   'EFOOTBALL_2023': 'efootball_2023',
   'EFOOTBALL_2024': 'efootball_2024',
   'FIFA_2024': 'fifa_2024',
+  'EFOOTBALL_2025': 'efootball_2025',
 };
 
 export const TournamentType = {

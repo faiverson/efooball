@@ -2,8 +2,8 @@ import React from 'react';
 
 export default function ApplicationLogo() {
   return (
-    <div className="w-full md:w-90">
-      <svg className="fill-main-violet" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 431.94 70.87" width="100%" height="100%">
+    <div className="w-24">
+      <svg className="fill-primary-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 431.94 70.87" width="100%" height="100%">
         <path className="st0"
               d="M35.43 13.11c6.61 0 12.55 2.87 16.64 7.44H67.6C61.97 8.42 49.69 0 35.43 0 21.18 0 8.89 8.42 3.27 20.55H18.8a22.226 22.226 0 0 1 16.63-7.44zM35.43 57.76c-6.61 0-12.55-2.87-16.64-7.44H3.27c5.62 12.13 17.91 20.55 32.16 20.55 14.25 0 26.54-8.42 32.16-20.55H52.07c-4.09 4.56-10.03 7.44-16.64 7.44zM56.78 28.88H.61C.21 31 0 33.19 0 35.43s.21 4.43.61 6.55h56.17c.64-2.07.98-4.27.98-6.56 0-2.27-.35-4.47-.98-6.54z"/>
         <g>

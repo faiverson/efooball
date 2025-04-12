@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Player extends Model
 {
@@ -21,5 +22,20 @@ class Player extends Model
     public function teams(): BelongsToMany
     {
         return $this->belongsToMany(Team::class, 'players_teams', 'player_id');
+    }
+
+    public function matches()
+    {
+        return $this->homeGames()->unionAll($this->awayGames());
+    }
+
+    public function homeGames(): HasMany
+    {
+        return $this->hasMany(SingleGame::class, 'home_id');
+    }
+
+    public function awayGames(): hasMany
+    {
+        return $this->hasMany(SingleGame::class, 'away_id');
     }
 }
