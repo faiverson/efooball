@@ -3,31 +3,8 @@ import axios from '@/lib/axios'
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head } from '@inertiajs/react'
 import { Button, Chip } from '@material-tailwind/react';
-
-const PlayerChipType = {
-    head: 'head',
-    tail: 'tail',
-};
-
-function PlayerChip({type, player, selected, onChange}) {
-  const onClick = ev => {
-    ev.preventDefault()
-    onChange(type, player)
-  }
-
-  const attributes = {
-    ...(selected && {
-        dismissible: {
-          onClose: ev => onClick(ev, type, player),
-        },
-    }),
-    ...(!selected && {onClick: ev => onClick(ev, type, player)})
-  }
-
-  return (
-    <Chip color={selected ? "green" : "amber"} value={player.name} {...attributes} />
-  )
-}
+import PlayerChip, { PlayerChipType } from '@/Components/PlayerChip';
+import { UserGroupIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 
 export default function RandomTeams({ players }) {
     const [data, setData] = useState([])
@@ -58,65 +35,121 @@ export default function RandomTeams({ players }) {
     const head_players = Array.from(headSelected)
     const tail_players = Array.from(tailSelected)
 
-  console.log(data, head_players.length > 0 || tail_players.length > 0)
     return (
         <GuestLayout>
             <Head><title>Random Teams</title></Head>
-            <div className="container flex flex-wrap flex-column mt-8">
-                <div className="w-full m-8">
-                    <h3 className="text-lg text-main-yellow">Select Head Players</h3>
-                    <div className="grid auto-rows-min grid-cols-7 gap-4 mt-4 w-fit mx-auto justify-items-center">
-                    { players.filter(item => !tailSelected.has(item)).map( item => {
-                            return (
-                                // <PlayerChip key={item.name} type={PlayerChipType.head} player={item} onChange={onChange} selected={headSelected.has(item)} />
-                                <div key={item.name} className="min-w-0 w-fit"><PlayerChip type={PlayerChipType.head} player={item} onChange={onChange} selected={headSelected.has(item)} /></div>
-                            )
-                        })
-                    }
+            <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100 py-8">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-8">
+                        <h1 className="text-3xl font-bold text-gray-900 mb-2">Random Team Generator</h1>
+                        <p className="text-gray-600">Select players for head and tail teams to create random matchups</p>
                     </div>
-                    <h3 className="text-lg text-main-yellow mt-4">Select Tail Players</h3>
-                    <div className="grid auto-rows-min grid-cols-7 gap-4 mt-4 w-fit mx-auto justify-items-center">
-                    { players.filter(item => !headSelected.has(item)).map( item => {
-                            return (
-                                <PlayerChip key={item.name} type={PlayerChipType.tail} player={item} onChange={onChange} selected={tailSelected.has(item)} />
-                            )
-                        })
-                    }
-                    </div>
-                </div>
-                <div className="w-full m-8">
-                  {data.length <= 0 && (head_players.length > 0 || tail_players.length > 0) &&
-                    <div className="flex flex-wrap flex-col items-center mx-auto p-4 mt-4 bg-white rounded gap-4 w-fit border-2 border-orange-300">
-                    <div className="flex flex-wrap flex-row justify-start items-start gap-4">
-                      <div className="flex flex-col">
-                        <h4 className="text-lg text-main-blue font-bold">Head Selection</h4>
-                        <ul className="flex flex-col">
-                          {head_players.map(player => <li className="text-main-blue"
-                                                          key={player.id}>{player.name}</li>)}
-                        </ul>
-                      </div>
-                      <div className="flex flex-col">
-                        <h4 className="text-lg text-main-blue font-bold">Tail Selection</h4>
-                        <ul className="flex flex-col">
-                          {tail_players.map(player => <li key={player.id}
-                                                          className="text-main-blue">{player.name}</li>)}
-                        </ul>
-                      </div>
-                    </div>
-                    <Button onClick={onSubmit}
-                            disabled={head_players.length < 2 || head_players.length !== tail_players.length}
-                            variant="filled" color="yellow">Randomize</Button>
-                  </div>
-                  }
-                    {data.length > 0 &&
-                    <div className="mx-auto mt-4 bg-white rounded border-2 border-orange-300 flex flex-wrap flex-col w-fit p-4">
-                        <h4 className="text-lg text-main-blue font-bold">TEAMS CREATED</h4>
-                        <ul className="flex flex-col">
-                        { data.map(team => <li key={team.id} className="text-main-blue">{team.name}</li>) }
-                        </ul>
-                    </div>
-                    }
 
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        {/* Head Players Section */}
+                        <div className="bg-white rounded-xl shadow-sm p-6 border border-neutral-200">
+                            <div className="flex items-center gap-2 mb-4">
+                                <UserGroupIcon className="h-6 w-6 text-amber-500" />
+                                <h3 className="text-xl font-semibold text-gray-900">Head Players</h3>
+                            </div>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                                {players.filter(item => !tailSelected.has(item)).map(item => (
+                                    <div key={item.name} className="min-w-0">
+                                        <PlayerChip
+                                            type={PlayerChipType.head}
+                                            player={item}
+                                            onChange={onChange}
+                                            selected={headSelected.has(item)}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Tail Players Section */}
+                        <div className="bg-white rounded-xl shadow-sm p-6 border border-neutral-200">
+                            <div className="flex items-center gap-2 mb-4">
+                                <UserGroupIcon className="h-6 w-6 text-purple-500" />
+                                <h3 className="text-xl font-semibold text-gray-900">Tail Players</h3>
+                            </div>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                                {players.filter(item => !headSelected.has(item)).map(item => (
+                                    <div key={item.name} className="min-w-0">
+                                        <PlayerChip
+                                            type={PlayerChipType.tail}
+                                            player={item}
+                                            onChange={onChange}
+                                            selected={tailSelected.has(item)}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Selection Summary */}
+                    {data.length <= 0 && (head_players.length > 0 || tail_players.length > 0) && (
+                        <div className="mt-8 bg-white rounded-xl shadow-sm p-6 border border-neutral-200">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="space-y-4">
+                                    <h4 className="text-lg font-semibold text-blue-600 flex items-center gap-2">
+                                        <UserGroupIcon className="h-5 w-5" />
+                                        Head Selection
+                                    </h4>
+                                    <ul className="space-y-2">
+                                        {head_players.map(player => (
+                                            <li key={player.id} className="text-blue-600 bg-blue-50 px-4 py-2 rounded-lg">
+                                                {player.name}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                                <div className="space-y-4">
+                                    <h4 className="text-lg font-semibold text-blue-600 flex items-center gap-2">
+                                        <UserGroupIcon className="h-5 w-5" />
+                                        Tail Selection
+                                    </h4>
+                                    <ul className="space-y-2">
+                                        {tail_players.map(player => (
+                                            <li key={player.id} className="text-blue-600 bg-blue-50 px-4 py-2 rounded-lg">
+                                                {player.name}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </div>
+                            <div className="mt-6 flex justify-center">
+                                <Button
+                                    onClick={onSubmit}
+                                    disabled={head_players.length < 2 || head_players.length !== tail_players.length}
+                                    variant="filled"
+                                    color="amber"
+                                    className="flex items-center gap-2"
+                                >
+                                    <ArrowPathIcon className="h-5 w-5" />
+                                    Generate Teams
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Results Section */}
+                    {data.length > 0 && (
+                        <div className="mt-8 bg-white rounded-xl shadow-sm p-6 border border-neutral-200">
+                            <h4 className="text-xl font-semibold text-blue-600 mb-4 flex items-center gap-2">
+                                <UserGroupIcon className="h-6 w-6" />
+                                Generated Teams
+                            </h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {data.map((team, index) => (
+                                    <div key={team.id} className="bg-blue-50 rounded-lg p-4">
+                                        <h5 className="text-lg font-medium text-blue-600 mb-2">Team {index + 1}</h5>
+                                        <p className="text-blue-600">{team.name}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </GuestLayout>
