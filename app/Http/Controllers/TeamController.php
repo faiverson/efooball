@@ -194,8 +194,13 @@ class TeamController extends Controller
         if(! empty($versions)) {
             $query->whereIn('version',  $versions);
         }
+
         if(!empty($start_at) && !empty($end_at)) {
             $query->whereBetween('played_at', [$start_at, $end_at]);
+        }
+
+        if(! empty($modality)) {
+            $query->whereIn('type', $modality);
         }
 
         $query->orderByDesc('id');

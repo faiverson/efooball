@@ -7,6 +7,7 @@ import { useStatsFilterForm } from '@/Hooks/useStatsFilterForm';
 import { TrophyIcon, CalendarIcon, ScaleIcon, TagIcon } from "@heroicons/react/24/outline";
 import { parseTag, groupMatchesByVersion, groupMatchesByDate, formatDate } from '@/utils/index';
 import SelectionSection from '@/Components/SelectionSection';
+import Score from '@/Components/Score';
 
 export default function TeamVersus({ teams, current_version, start_at, end_at, min_amount, modality }) {
   const local_teams = teams.map(team => ({...team, id: String(team.id), players: team.players.map(p => p.id)}));
@@ -169,7 +170,7 @@ export default function TeamVersus({ teams, current_version, start_at, end_at, m
                               </div>
                             </AccordionHeader>
                             <AccordionBody className="px-0">
-                              <div className="grid gap-2 p-4">
+                              <div className="grid gap-2 p-2">
                                 {Object.entries(groupMatchesByDate(matches)).map(([date, dateMatches]) => (
                                   <div key={date} className="flex flex-col gap-2">
                                     <div className="flex items-center justify-end gap-2 text-neutral-500 text-sm">
@@ -189,23 +190,19 @@ export default function TeamVersus({ teams, current_version, start_at, end_at, m
                                       return (
                                         <div
                                           key={i}
-                                          className="flex items-center justify-between p-3 bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors"
+                                          className="flex items-center justify-between p-2 bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors"
                                         >
-                                          <div className="flex items-center gap-4">
-                                            <div className="flex items-center gap-2">
-                                              <span className={`font-semibold ${isFirstTeamWin ? 'text-blue-600' : 'text-neutral-700'}`}>
-                                                {stats?.first_team?.name}
-                                              </span>
-                                              <span className="text-neutral-500">{team_home_score}</span>
-                                            </div>
-                                            <ScaleIcon className="h-4 w-4 text-neutral-400" />
-                                            <div className="flex items-center gap-2">
-                                              <span className="text-neutral-500">{team_away_score}</span>
-                                              <span className={`font-semibold ${!isFirstTeamWin && !isDraw ? 'text-blue-600' : 'text-neutral-700'}`}>
-                                                {stats?.second_team?.name}
-                                              </span>
-                                            </div>
-                                          </div>
+                                          <Score
+                                            homeName={stats?.first_team?.name}
+                                            awayName={stats?.second_team?.name}
+                                            homeScore={team_home_score}
+                                            awayScore={team_away_score}
+                                            isHomeWinner={isFirstTeamWin}
+                                            isAwayWinner={!isFirstTeamWin && !isDraw}
+                                            isDraw={isDraw}
+                                            homeColor="text-blue-600"
+                                            awayColor="text-blue-600"
+                                          />
                                         </div>
                                       )
                                     })}

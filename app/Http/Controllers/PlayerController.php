@@ -84,27 +84,27 @@ class PlayerController extends Controller
             'modality' => empty($request->modality) ? TournamentType::getValues() : array_map(fn($item) => TournamentType::getValue($item), explode(',', $request->modality)),
         ];
 
-        $query = $this->queryVersusStats($args->first_team_id, $args->second_team_id, $args->versions, $args->start_at, $args->end_at);
-        $query_total = $this->queryVersusTotalStats($args->first_team_id, $args->second_team_id, $args->versions, $args->start_at, $args->end_at);
-        $totals = $query_total->get();
+        $query = $this->queryVersusFromTeamStats($args->first_player_id, $args->second_player_id, $args->versions, $args->start_at, $args->end_at, $args->modality);
+        $query_total = $this->queryVersusFromTeamTotalStats($args->first_player_id, $args->second_player_id, $args->versions, $args->start_at, $args->end_at, $args->modality);
+        $query_single = $this->queryVersusFromSingleStats($args->first_player_id, $args->second_player_id, $args->versions, $args->start_at, $args->end_at, $args->modality);
+        $query_total_single = $this->queryVersusFromSingleTotalStats($args->first_player_id, $args->second_player_id, $args->versions, $args->start_at, $args->end_at, $args->modality);
+
         return response()->json(['data' => [
-            // 'team_stats' => [
-            //     'first_player' => Team::find($args->first_player_id),
-            // 'second_player' => Team::find($args->second_player_id),
-            // 'games' => $query->get(),
-            // 'totals' => $totals->first(),
-            // ],
-            // 'single_stats' => [
-            //     'first_player' => Team::find($args->first_player_id),
-            //     'second_player' => Team::find($args->second_player_id),
-            //     'games' => $query->get(),
-            //     'totals' => $totals->first(),
-            // ]
+            'first_player' => Player::find($args->first_player_id),
+            'second_player' => Player::find($args->second_player_id),
+            'team_stats' => [
+                'games' => $query->get(),
+                'totals' => $query_total->get()->first(),
+            ],
+            'single_stats' => [
+                'games' => $query_single->get(),
+                'totals' => $query_total_single->get()->first(),
+            ]
 
         ]]);
     }
 
-    private function queryTeamStats(array $versions, int $min_amount, string $start_at = null, string $end_at = null, $modality = []): Builder
+    private function queryTeamStats(array $versions, int $min_amount, string $start_at = null, string $end_at = null, $modality = null): Builder
     {
         $player_table = (new Player())->getTable();
         $team_table = (new Team())->getTable();
@@ -159,7 +159,7 @@ class PlayerController extends Controller
         $query->orderByRaw('average DESC');
         return $query;
     }
-    private function querySingleStats(array $versions, int $min_amount, string $start_at = null, string $end_at = null, $modality = []): Builder
+    private function querySingleStats(array $versions, int $min_amount, string $start_at = null, string $end_at = null, $modality = null): Builder
     {
         $player_table = (new Player())->getTable();
         $game_table = (new SingleGame())->getTable();
@@ -189,7 +189,7 @@ class PlayerController extends Controller
 
         $query->whereIn('g.version',  $versions);
 
-        if(count($modality) > 0) {
+        if(!empty($modality)) {
             $query->whereIn('g.type',  $modality);
         }
 
@@ -207,27 +207,222 @@ class PlayerController extends Controller
         return $query;
     }
 
-    private function queryVersusStats(int $first_team_id, int $second_team_id, array $versions, string $start_at = null, string $end_at = null): Builder
+    private function queryVersusFromTeamStats(int $first_player_id, int $second_player_id, array $versions, string $start_at = null, string $end_at = null, $modality = null): Builder
     {
         $game_table = (new Game())->getTable();
-        $query = DB::table($game_table);
-        $query->where(function ($q) use($first_team_id, $second_team_id) {
-            $q->where(function ($q) use($first_team_id, $second_team_id) {
-                $q->where('team_home_id', $first_team_id)->where('team_away_id', $second_team_id);
+        $player_team_table = 'players_teams';
+        $team_table = (new Team())->getTable();
+
+        $query = DB::table("$game_table as g")
+            ->select([
+                "g.*",
+                "th.name as home_team_name",
+                "ta.name as away_team_name"
+            ])
+            ->join("$team_table as th", "g.team_home_id", "=", "th.id")
+            ->join("$team_table as ta", "g.team_away_id", "=", "ta.id");
+
+        // Add version filter at root level
+        if(!empty($versions)) {
+            $query->whereIn('g.version', $versions);
+        }
+
+        // Add date range filter at root level
+        if(!empty($start_at) && !empty($end_at)) {
+            $query->whereBetween('g.played_at', [$start_at, $end_at]);
+        }
+
+        // Add modality filter at root level
+        if(!empty($modality)) {
+            $query->whereIn('g.type', $modality);
+        }
+
+        // Add player-team relationship conditions
+        $query->where(function($q) use ($first_player_id, $second_player_id, $player_team_table) {
+            $q->where(function($q) use ($first_player_id, $second_player_id, $player_team_table) {
+                // First player on home team, second on away team
+                $q->whereExists(function($q) use ($player_team_table, $first_player_id) {
+                    $q->select(DB::raw(1))
+                      ->from("$player_team_table")
+                      ->whereRaw("team_id = g.team_home_id")
+                      ->where('player_id', $first_player_id);
+                })
+                ->whereExists(function($q) use ($player_team_table, $second_player_id) {
+                    $q->select(DB::raw(1))
+                      ->from("$player_team_table")
+                      ->whereRaw("team_id = g.team_away_id")
+                      ->where('player_id', $second_player_id);
+                });
             })
-            ->orWhere(function ($q) use($first_team_id, $second_team_id) {
-                $q->where('team_home_id', $second_team_id)->where('team_away_id', $first_team_id);
+            ->orWhere(function($q) use ($first_player_id, $second_player_id, $player_team_table) {
+                // First player on away team, second on home team
+                $q->whereExists(function($q) use ($player_team_table, $first_player_id) {
+                    $q->select(DB::raw(1))
+                      ->from("$player_team_table")
+                      ->whereRaw("team_id = g.team_away_id")
+                      ->where('player_id', $first_player_id);
+                })
+                ->whereExists(function($q) use ($player_team_table, $second_player_id) {
+                    $q->select(DB::raw(1))
+                      ->from("$player_team_table")
+                      ->whereRaw("team_id = g.team_home_id")
+                      ->where('player_id', $second_player_id);
+                });
+            });
+        });
+
+        $query->orderByDesc('g.id');
+        return $query;
+    }
+
+    private function queryVersusFromTeamTotalStats(int $first_player_id, int $second_player_id, array $versions, string $start_at = null, string $end_at = null, $modality = null): Builder
+    {
+        $game_table = (new Game())->getTable();
+        $player_team_table = 'players_teams';
+
+        $query = DB::table("$game_table as g")
+            ->select([
+                DB::raw("COUNT(g.id) as total"),
+                DB::raw("SUM(CASE
+                    WHEN pt1.team_id = g.team_home_id AND g.team_home_score > g.team_away_score THEN 1
+                    WHEN pt1.team_id = g.team_away_id AND g.team_away_score > g.team_home_score THEN 1
+                    ELSE 0
+                END) as first_player_win"),
+                DB::raw("SUM(CASE
+                    WHEN g.team_home_score = g.team_away_score THEN 1
+                    ELSE 0
+                END) as draw"),
+                DB::raw("SUM(CASE
+                    WHEN pt1.team_id = g.team_home_id AND g.team_home_score < g.team_away_score THEN 1
+                    WHEN pt1.team_id = g.team_away_id AND g.team_away_score < g.team_home_score THEN 1
+                    ELSE 0
+                END) as first_player_lost")
+            ]);
+
+        // Add version filter at root level
+        if(!empty($versions)) {
+            $query->whereIn('g.version', $versions);
+        }
+
+        // Add date range filter at root level
+        if(!empty($start_at) && !empty($end_at)) {
+            $query->whereBetween('g.played_at', [$start_at, $end_at]);
+        }
+
+        // Add modality filter at root level
+        if(!empty($modality)) {
+            $query->whereIn('g.type', $modality);
+        }
+
+        // Join with players_teams table for first player
+        $query->join("$player_team_table as pt1", function($join) use ($first_player_id) {
+            $join->on(function($join) {
+                $join->on('pt1.team_id', '=', "g.team_home_id")
+                    ->orOn('pt1.team_id', '=', "g.team_away_id");
+            })
+            ->where('pt1.player_id', '=', $first_player_id);
+        });
+
+        // Join with players_teams table for second player
+        $query->join("$player_team_table as pt2", function($join) use ($second_player_id) {
+            $join->on(function($join) {
+                $join->on('pt2.team_id', '=', "g.team_home_id")
+                    ->orOn('pt2.team_id', '=', "g.team_away_id");
+            })
+            ->where('pt2.player_id', '=', $second_player_id);
+        });
+
+        // Ensure players are on different teams
+        $query->where(function($q) {
+            $q->where(function($q) {
+                $q->where('pt1.team_id', '=', DB::raw('g.team_home_id'))
+                  ->where('pt2.team_id', '=', DB::raw('g.team_away_id'));
+            })
+            ->orWhere(function($q) {
+                $q->where('pt1.team_id', '=', DB::raw('g.team_away_id'))
+                  ->where('pt2.team_id', '=', DB::raw('g.team_home_id'));
+            });
+        });
+
+        return $query;
+    }
+    private function queryVersusFromSingleStats(int $first_player_id, int $second_player_id, array $versions, string $start_at = null, string $end_at = null, $modality = null): Builder
+    {
+        $game_table = (new SingleGame())->getTable();
+
+        $query = DB::table("$game_table as g");
+
+        // Find matches where first player is home and second is away, or vice versa
+        $query->where(function($q) use ($first_player_id, $second_player_id) {
+            $q->where(function($q) use ($first_player_id, $second_player_id) {
+                $q->where('g.home_id', $first_player_id)
+                  ->where('g.away_id', $second_player_id);
+            })->orWhere(function($q) use ($first_player_id, $second_player_id) {
+                $q->where('g.home_id', $second_player_id)
+                  ->where('g.away_id', $first_player_id);
             });
         });
 
         if(! empty($versions)) {
-            $query->whereIn('version',  $versions);
-        }
-        if(!empty($start_at) && !empty($end_at)) {
-            $query->whereBetween('played_at', [$start_at, $end_at]);
+            $query->whereIn('g.version', $versions);
         }
 
-        $query->orderByDesc('id');
+        if(!empty($start_at) && !empty($end_at)) {
+            $query->whereBetween('g.played_at', [$start_at, $end_at]);
+        }
+
+        if(!empty($modality) && is_array($modality)) {
+            $query->whereIn('g.type', $modality);
+        }
+        // $q = vsprintf(str_replace('?', "'%s'", $query->toSql()), $query->getBindings());
+        // dd($q);
+        return $query;
+    }
+
+    private function queryVersusFromSingleTotalStats(int $first_player_id, int $second_player_id, array $versions, string $start_at = null, string $end_at = null, $modality = null): Builder
+    {
+        $game_table = (new SingleGame())->getTable();
+
+        $query = DB::table("$game_table as g")
+            ->select([
+                DB::raw("COUNT(g.id) as total"),
+                DB::raw("SUM(CASE
+                    WHEN (g.home_id = $first_player_id AND g.home_score > g.away_score) OR (g.away_id = $first_player_id AND g.away_score > g.home_score) THEN 1
+                    ELSE 0
+                END) as first_player_win"),
+                DB::raw("SUM(CASE
+                    WHEN g.home_score = g.away_score THEN 1
+                    ELSE 0
+                END) as draw"),
+                DB::raw("SUM(CASE
+                    WHEN (g.home_id = $first_player_id AND g.home_score < g.away_score) OR (g.away_id = $first_player_id AND g.away_score < g.home_score) THEN 1
+                    ELSE 0
+                END) as first_player_lost")
+            ]);
+
+        // Find matches where first player is home and second is away, or vice versa
+        $query->where(function($q) use ($first_player_id, $second_player_id) {
+            $q->where(function($q) use ($first_player_id, $second_player_id) {
+                $q->where('g.home_id', $first_player_id)
+                  ->where('g.away_id', $second_player_id);
+            })->orWhere(function($q) use ($first_player_id, $second_player_id) {
+                $q->where('g.home_id', $second_player_id)
+                  ->where('g.away_id', $first_player_id);
+            });
+        });
+
+        if(! empty($versions)) {
+            $query->whereIn('g.version', $versions);
+        }
+
+        if(!empty($start_at) && !empty($end_at)) {
+            $query->whereBetween('g.played_at', [$start_at, $end_at]);
+        }
+
+        if(!empty($modality) && is_array($modality)) {
+            $query->whereIn('g.type', $modality);
+        }
+
         return $query;
     }
 

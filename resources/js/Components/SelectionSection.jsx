@@ -27,6 +27,7 @@ export default function SelectionSection({
       <div className="flex flex-col md:flex-row items-center justify-center gap-4">
         <div className="w-full md:w-1/3">
           <TeamDropdown
+            placeholder={type === 'teams' ? 'Select a team' : 'Select a player'}
             name="local_team"
             teams={local_teams}
             selected={first_team}
@@ -37,6 +38,7 @@ export default function SelectionSection({
         </div>
         <div className="w-full md:w-1/3">
           <TeamDropdown
+            placeholder={type === 'teams' ? 'Select a team' : 'Select a player'}
             name="away_team"
             teams={away_teams}
             selected={second_team}

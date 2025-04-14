@@ -2,7 +2,7 @@
 
 return [
 
-    'current_version' => \App\Enums\GameVersion::EFOOTBALL_2024,
+    'current_version' => \App\Enums\GameVersion::EFOOTBALL_2025,
 
     'min_amount' => 5,
 

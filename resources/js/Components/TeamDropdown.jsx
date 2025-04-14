@@ -3,14 +3,13 @@ import { Select, Option, Chip } from "@material-tailwind/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 
 export default function TeamDropdown({
-  name,
   teams,
   selected,
   onChange,
   label,
   error,
   disabled = false,
-  placeholder = "Select a team"
+  placeholder
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef(null)
