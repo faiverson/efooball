@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\TeamController;
+use App\Http\Controllers\LibertadoresController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -30,4 +31,8 @@ Route::controller(TeamController::class)->group(function () {
     Route::get('/team_versus', 'api_versus');
     Route::post('/random', 'api_random');
     Route::post('/strikes', 'api_strikes');
+});
+
+Route::controller(LibertadoresController::class)->group(function () {
+    Route::get('/libertadores', 'index');
 });

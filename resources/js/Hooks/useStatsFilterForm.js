@@ -30,10 +30,17 @@ export function useStatsFilterForm({ baseUrl, data, current_version, start_at, e
         setMinGames(ev.target.value);
     };
 
-    const handleChange = (ev, field) => {
-        ev.preventDefault();
-        let value = ev.target.value;
-        const date = value ? DateTime.fromFormat(value, 'yyyy-MM-dd') : null;
+    const handleChange = (value, field) => {
+        let date = null;
+        if (value && value.target) {
+            // Handle event object
+            value.preventDefault();
+            date = value.target.value ? DateTime.fromFormat(value.target.value, 'yyyy-MM-dd') : null;
+        } else {
+            // Handle direct date value
+            date = value;
+        }
+
         if(field === 'from_at') {
             setFromAt(date);
         } else if(field === 'until_at') {

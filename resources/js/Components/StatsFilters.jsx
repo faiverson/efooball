@@ -15,7 +15,8 @@ export default function StatsFilters({
     onChangeMinGames,
     handleChange,
     onChangeModality,
-    onSubmit
+    onSubmit,
+    filterType = "both" // "team", "single", or "both"
 }) {
     const handleClearMinGames = () => {
         const event = {
@@ -27,6 +28,17 @@ export default function StatsFilters({
         };
         onChangeMinGames(event);
     };
+
+    const filteredTournamentTypes = tournamentTypes.filter(type => {
+        if (filterType === "both") return true;
+        if (filterType === "single") {
+            return ["AMISTOSO", "TORNEO", "COPA"].includes(type.name);
+        }
+        if (filterType === "team") {
+            return ["AMISTOSO", "LIBERTADORES", "SUDAMERICANA"].includes(type.name);
+        }
+        return false;
+    });
 
     return (
         <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-lg p-4 border border-neutral-200 sticky top-4">
@@ -46,7 +58,7 @@ export default function StatsFilters({
                     <div className="space-y-0.5">
                         <label className="text-xs font-medium text-neutral-500">Tournament Types</label>
                         <div className="pl-0.5">
-                            <TournamentTypeTags tournamentTypes={tournamentTypes} onChange={onChangeModality} />
+                            <TournamentTypeTags tournamentTypes={filteredTournamentTypes} onChange={onChangeModality} />
                         </div>
                     </div>
 

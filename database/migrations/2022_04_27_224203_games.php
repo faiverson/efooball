@@ -34,6 +34,7 @@ return new class extends Migration
             $table->unsignedInteger('away_id');
             $table->unsignedInteger('home_score');
             $table->unsignedInteger('away_score');
+            $table->string('penalty_score')->nullable();
             $table->enum('result', ['home', 'draw', 'away']);
             $table->enum('version', GameVersion::getValues());
             $table->enum('type', TournamentType::getValues());

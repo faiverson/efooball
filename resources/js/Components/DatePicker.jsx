@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Input,
   Popover,
@@ -10,22 +10,36 @@ import { DayPicker } from "react-day-picker";
 import { ChevronRightIcon, ChevronLeftIcon } from "@heroicons/react/24/outline";
 
 export default function DatePicker({label, value, onChange}) {
-  const date = value ? format(new Date(value), 'yyyy-MM-dd') : ''
+  const [open, setOpen] = useState(false);
+  const date = value ? format(new Date(value), 'yyyy-MM-dd') : '';
+
+  const handleSelect = (date) => {
+    onChange(date);
+    setOpen(false);
+  };
+
+  const handleInputClick = () => {
+    setOpen(!open);
+  };
+
   return (
-    <Popover placement="bottom">
+    <Popover placement="bottom" open={open} handler={setOpen}>
         <PopoverHandler>
-          <Input
-            label={label}
-            onChange={() => null}
-            color="yellow"
-            value={date}
-          />
+          <div onClick={handleInputClick}>
+            <Input
+              label={label}
+              onChange={() => null}
+              color="yellow"
+              value={date}
+              readOnly
+            />
+          </div>
         </PopoverHandler>
-        <PopoverContent>
+        <PopoverContent className="z-50">
           <DayPicker
             mode="single"
             selected={value}
-            onSelect={onChange}
+            onSelect={handleSelect}
             showOutsideDays
             className="border-0"
             classNames={{

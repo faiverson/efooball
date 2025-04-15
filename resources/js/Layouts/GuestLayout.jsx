@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from '@inertiajs/inertia-react';
+import { Link } from '@inertiajs/react';
 import ApplicationLogo from '@/Components/ApplicationLogo';
 
 export default function Guest({ user, children }) {
@@ -14,6 +14,7 @@ export default function Guest({ user, children }) {
     { name: 'Random', route: 'random-teams' },
     { name: 'Libertadores', route: 'libertadores' },
     { name: 'Sudamericana', route: 'sudamericana' },
+    { name: 'Torneo Individual', route: 'torneo' },
   ];
 
   return (

@@ -1,18 +1,20 @@
 import { useState, createContext, useContext, Fragment } from 'react';
 import { Link } from '@inertiajs/react';
 import { Transition } from '@headlessui/react';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
 const DropDownContext = createContext();
 
 const Dropdown = ({ children }) => {
     const [open, setOpen] = useState(false);
+    const [search, setSearch] = useState('');
 
     const toggleOpen = () => {
         setOpen((previousState) => !previousState);
     };
 
     return (
-        <DropDownContext.Provider value={{ open, setOpen, toggleOpen }}>
+        <DropDownContext.Provider value={{ open, setOpen, toggleOpen, search, setSearch }}>
             <div className="relative">{children}</div>
         </DropDownContext.Provider>
     );
@@ -31,7 +33,7 @@ const Trigger = ({ children }) => {
 };
 
 const Content = ({ align = 'right', width = '48', contentClasses = 'py-1 bg-white', children }) => {
-    const { open, setOpen } = useContext(DropDownContext);
+    const { open, setOpen, search, setSearch } = useContext(DropDownContext);
 
     let alignmentClasses = 'origin-top';
 
@@ -63,7 +65,29 @@ const Content = ({ align = 'right', width = '48', contentClasses = 'py-1 bg-whit
                     className={`absolute z-50 mt-2 rounded-md shadow-lg ${alignmentClasses} ${widthClasses}`}
                     onClick={() => setOpen(false)}
                 >
-                    <div className={`rounded-md ring-1 ring-black ring-opacity-5 ` + contentClasses}>{children}</div>
+                    <div className="p-2 border-b">
+                        <div className="relative">
+                            <input
+                                type="text"
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                placeholder="Search..."
+                                className="w-full pl-8 pr-2 py-1 text-sm border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            />
+                            <MagnifyingGlassIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        </div>
+                    </div>
+                    <div className={`rounded-md ring-1 ring-black ring-opacity-5 ` + contentClasses}>
+                        {React.Children.map(children, (child) => {
+                            if (!child) return null;
+
+                            const text = child.props.children?.toString().toLowerCase() || '';
+                            if (search && !text.includes(search.toLowerCase())) {
+                                return null;
+                            }
+                            return child;
+                        })}
+                    </div>
                 </div>
             </Transition>
         </>

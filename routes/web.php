@@ -8,6 +8,7 @@ use App\Http\Controllers\TournamentController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PlayerController;
+use App\Http\Controllers\LibertadoresController;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,6 +42,7 @@ Route::controller(PlayerController::class)->group(function () {
 Route::controller(TournamentController::class)->group(function () {
     Route::get('/tournaments/libertadores', 'libertadores')->name('libertadores');
     Route::get('/tournaments/sudamericana', 'sudamericana')->name('sudamericana');
+    Route::get('/tournaments/individual', 'torneo')->name('torneo');
 });
 
 Route::middleware('auth')->group(function () {

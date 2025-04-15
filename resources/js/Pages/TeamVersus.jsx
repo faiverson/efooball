@@ -5,16 +5,18 @@ import GuestLayout from '@/Layouts/GuestLayout';
 import { Accordion, AccordionHeader, AccordionBody, Chip } from "@material-tailwind/react";
 import { useStatsFilterForm } from '@/Hooks/useStatsFilterForm';
 import { TrophyIcon, CalendarIcon, ScaleIcon, TagIcon } from "@heroicons/react/24/outline";
-import { parseTag, groupMatchesByVersion, groupMatchesByDate, formatDate } from '@/utils/index';
+import { parseTag, groupMatchesByVersion, groupMatchesByDate, formatDate } from '@/lib/utils';
 import SelectionSection from '@/Components/SelectionSection';
 import Score from '@/Components/Score';
+import HeadSummary from '@/Components/HeadSummary';
+import TagSummary from '@/Components/TagSummary';
 
-export default function TeamVersus({ teams, current_version, start_at, end_at, min_amount, modality }) {
+export default function TeamVersus({ teams, current_version, start_at, end_at, min_amount }) {
   const local_teams = teams.map(team => ({...team, id: String(team.id), players: team.players.map(p => p.id)}));
 
-    const [first_team, setFirstTeam] = useState('-1')
-    const [second_team, setSecondTeam] = useState('-1')
-    const [away_teams, setAwayTeams] = useState([])
+  const [first_team, setFirstTeam] = useState('-1')
+  const [second_team, setSecondTeam] = useState('-1')
+  const [away_teams, setAwayTeams] = useState([])
   const [showErrors, setShowErrors] = useState(false)
   const [openAccordion, setOpenAccordion] = useState(1);
 
@@ -68,8 +70,6 @@ export default function TeamVersus({ teams, current_version, start_at, end_at, m
     setOpenAccordion(openAccordion === value ? 0 : value);
   };
 
-  console.log(stats);
-
     return (
         <GuestLayout>
             <Head><title>Team Head to Head</title></Head>
@@ -88,6 +88,7 @@ export default function TeamVersus({ teams, current_version, start_at, end_at, m
               handleChange={handleChange}
               onChangeModality={onChangeModality}
               onSubmit={handleSubmit}
+              filterType="team"
             />
           </div>
 
@@ -117,28 +118,21 @@ export default function TeamVersus({ teams, current_version, start_at, end_at, m
                           <TrophyIcon className="h-6 w-6" />
                           <h4 className="text-xl font-semibold">Head to Head Summary</h4>
                         </div>
-                        <div className="flex items-center gap-4 text-xl">
-                          <span className="font-bold text-teal-700">{stats.first_team.name}</span>
-                          <div className="flex items-center gap-2">
-                            <span className="px-4 py-2 bg-teal-50 rounded-full text-teal-700 font-medium">
-                              {`${stats.totals.first_team_win}-${stats.totals.draw}-${stats.totals.first_team_lost}`}
-                            </span>
-                          </div>
-                          <span className="font-bold text-teal-700">{stats.second_team.name}</span>
-                        </div>
-                        <div className="w-full flex items-center gap-2 text-neutral-600 text-sm">
-                          <TagIcon className="h-4 w-4 mt-0.5 text-teal-500" />
-                          <span>Versions:</span>
-                          <div className="flex flex-wrap gap-2">
-                            {versions.filter(v => v.active).map((v, index) => (
-                              <Chip
-                                key={index}
-                                value={parseTag(v.name)}
-                                className="bg-teal-50 text-teal-600"
-                              />
-                            ))}
-                          </div>
-                        </div>
+                        <HeadSummary
+                            homeTeam={stats.first_team.name}
+                            awayTeam={stats.second_team.name}
+                            homeColor="teal"
+                            awayColor="teal"
+                            homeScore={stats.totals.first_team_win}
+                            awayScore={stats.totals.first_team_lost}
+                            draw={stats.totals.draw}
+                        />
+                        <TagSummary
+                            versions={versions}
+                            color="teal"
+                            label="Versions"
+                            icon={true}
+                          />
                     </div>
 
                     {/* Match History */}
@@ -182,30 +176,30 @@ export default function TeamVersus({ teams, current_version, start_at, end_at, m
                                         </span>
                                       )}
                                     </div>
+                                    <div className="bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors">
                                     {dateMatches.map((match, i) => {
-                                      const {team_home_score, team_away_score, played_at} = match
-                                      const isFirstTeamWin = team_home_score > team_away_score
-                                      const isDraw = team_home_score === team_away_score
+                                      const {id, team_home_id, team_away_id, team_home_score, team_away_score, type} = match
+                                      const team_home = team_home_id === stats.first_team.id ? stats.first_team.name : stats.second_team.name;
+                                      const team_away = team_away_id === stats.first_team.id ? stats.first_team.name : stats.second_team.name;
 
                                       return (
                                         <div
-                                          key={i}
-                                          className="flex items-center justify-between p-2 bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors"
+                                        key={id}
+                                          className="flex items-center justify-between"
                                         >
                                           <Score
-                                            homeName={stats?.first_team?.name}
-                                            awayName={stats?.second_team?.name}
+                                            homeName={team_home}
+                                            awayName={team_away}
                                             homeScore={team_home_score}
                                             awayScore={team_away_score}
-                                            isHomeWinner={isFirstTeamWin}
-                                            isAwayWinner={!isFirstTeamWin && !isDraw}
-                                            isDraw={isDraw}
-                                            homeColor="text-blue-600"
-                                            awayColor="text-blue-600"
+                                            homeColor="blue"
+                                            awayColor="blue"
+                                            tournamentType={type}
                                           />
                                         </div>
                                       )
                                     })}
+                                    </div>
                                   </div>
                                 ))}
                               </div>
@@ -216,13 +210,13 @@ export default function TeamVersus({ teams, current_version, start_at, end_at, m
                     </div>
                       </>
 )}
-
+{stats?.games?.length === 0 && (
                       <div className="text-center py-8">
                         <div className="flex flex-col items-center gap-2 text-neutral-600">
                           <ScaleIcon className="h-8 w-8" />
                           <p className="text-lg">No matches between {stats.first_team.name} and {stats.second_team.name}</p>
                         </div>
-                        </div>
+                        </div>)}
                   </div>
                 </div>
                       )}

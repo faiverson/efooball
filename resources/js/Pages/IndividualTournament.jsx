@@ -9,7 +9,7 @@ import { useTournamentChampions } from '@/Hooks/useTournamentChampions';
 import Champions from '@/Components/Champions';
 import PositionsGrid from '@/Components/PositionsGrid';
 
-export default function Libertadores({tournaments}) {
+export default function IndividualTournament({tournaments}) {
     const [expandedTournaments, setExpandedTournaments] = useState(new Set());
     const champions = useTournamentChampions(tournaments);
 
@@ -23,9 +23,18 @@ export default function Libertadores({tournaments}) {
         setExpandedTournaments(newExpanded);
     };
 
+    // we need to sort by match against for these tournaments, we are doing this by tournament name and manually adding the tournaments that need to be sorted by match against
+    const sortByMatchAgainst = ['Torneo 6th'];
+
+    // Add drawResolution field to tournaments
+    tournaments = tournaments.map(tournament => ({
+      ...tournament,
+      drawResolution: sortByMatchAgainst.includes(tournament.name)
+    }));
+
     return (
         <GuestLayout>
-            <Head title="Libertadores" />
+            <Head title="Individual Tournament" />
             <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100 py-3">
                 <div className="flex">
                     {/* Champions Sidebar */}
@@ -39,7 +48,7 @@ export default function Libertadores({tournaments}) {
                             <div className="text-center mb-3">
                                 <div className="flex items-center justify-center gap-2 mb-2">
                                     <TrophyIcon className="w-8 h-8 text-gray-900" />
-                                    <h1 className="text-3xl font-bold text-gray-900">Libertadores</h1>
+                                    <h1 className="text-3xl font-bold text-gray-900">Individual Tournament</h1>
                                 </div>
                                 <p className="text-gray-600">History of champions and tournament results</p>
                             </div>

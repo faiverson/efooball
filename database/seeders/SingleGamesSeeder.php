@@ -28,7 +28,8 @@ class SingleGamesSeeder extends Seeder
 
         if(env('RESET_DATABASE')) {
             Schema::disableForeignKeyConstraints();
-            DB::table('tournaments')->truncate();
+            // Delete only tournaments with type TORNEO or COPA
+            Tournament::whereIn('type', [TournamentType::TORNEO, TournamentType::COPA])->delete();
             DB::table('single_strikes')->truncate();
             DB::table('single_games')->truncate();
             Schema::enableForeignKeyConstraints();
@@ -38,7 +39,7 @@ class SingleGamesSeeder extends Seeder
             $total_games = SingleGame::count();
             $from_row = $total_games + 2; // because should start +1 but the first row is a title, so it is 1 + 1 = 2
             $to_row = $from_row + self::CHUNK - 1;
-            $range = "individual!B{$from_row}:I{$to_row}";
+            $range = "individual!B{$from_row}:J{$to_row}";
             $response = $sheets->spreadsheets_values->get($spreadsheetId, $range);
             $rows = $response->getValues();
             $this->createGames($rows);
@@ -50,7 +51,7 @@ class SingleGamesSeeder extends Seeder
         $t_id = 0;
         $date_at = null;
         foreach ($rows as $row) {
-            [$date, $p_home, $home_score, $away_score, $p_away, $winner, $version, $tournament] = $row + [7 => ''];
+            [$date, $p_home, $home_score, $away_score, $p_away, $penalty_score, $winner, $version, $tournament] = $row;
             if(empty($p_home) && empty($p_away)) {
                 return false;
             }
@@ -78,6 +79,7 @@ class SingleGamesSeeder extends Seeder
                     'away_score'=> $away_score,
                     'type'=> $type,
                     'version'=> $game_version,
+                    'penalty_score'=> $penalty_score,
                     'result'=> $home_score >= $away_score ? ($home_score > $away_score ? 'home' : 'draw')  : 'away',
                     'played_at'=> $date_at->format('Y-m-d'),
                 ]);
@@ -96,7 +98,6 @@ class SingleGamesSeeder extends Seeder
                     );
 
                     empty($selTournament->games) ? $selTournament->games = collect($game->getKey()): $selTournament->games->push($game->getKey());
-                    $selTournament->positions = $this->calculateTournamentPosition($selTournament->games);
                     $selTournament->save();
 
                     if($selTournament->id !== $t_id) {

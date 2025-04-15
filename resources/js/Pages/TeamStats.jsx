@@ -38,6 +38,7 @@ export default function TeamStats({ data, current_version, start_at, end_at, min
                             handleChange={handleChange}
                             onChangeModality={onChangeModality}
                             onSubmit={onSubmit}
+                            filterType="team"
                         />
                     </div>
 

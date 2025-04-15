@@ -5,9 +5,11 @@ import GuestLayout from '@/Layouts/GuestLayout';
 import { Accordion, AccordionHeader, AccordionBody, Chip, Tabs, TabsHeader, Tab } from "@material-tailwind/react";
 import { useStatsFilterForm } from '@/Hooks/useStatsFilterForm';
 import { TrophyIcon, CalendarIcon, ScaleIcon, TagIcon } from "@heroicons/react/24/outline";
-import { parseTag, groupMatchesByVersion, groupMatchesByDate, formatDate } from '@/utils/index';
+import { parseTag, groupMatchesByVersion, groupMatchesByDate, formatDate } from '@/lib/utils';
 import SelectionSection from '@/Components/SelectionSection';
 import Score from '@/Components/Score';
+import HeadSummary from '@/Components/HeadSummary';
+import TagSummary from '@/Components/TagSummary';
 
 export default function PlayerVersus({ players, current_version, start_at, end_at, min_amount }) {
     const [first_player, setFirstPlayer] = useState('-1')
@@ -72,9 +74,6 @@ export default function PlayerVersus({ players, current_version, start_at, end_a
         setOpenAccordion(openAccordion === value ? 0 : value);
     };
 
-    console.log('stats', stats)
-    console.log('Single matches data:', stats?.single_stats?.games);
-
     return (
         <GuestLayout>
             <Head><title>Player Versus</title></Head>
@@ -121,45 +120,40 @@ export default function PlayerVersus({ players, current_version, start_at, end_a
                                                 <TrophyIcon className="h-6 w-6" />
                                                 <h4 className="text-xl font-semibold">Head to Head Summary</h4>
                                             </div>
+
                                             <div className="flex gap-24">
                                                 <div className="flex flex-col items-center gap-2">
-                                                    <div className="flex items-center gap-4 text-xl">
-                                                        <span className="font-bold text-teal-700">{stats.first_player.name}</span>
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="px-4 py-2 bg-teal-50 rounded-full text-teal-700 font-medium">
-                                                                {`${stats.team_stats?.totals?.first_player_win || 0}-${stats.team_stats?.totals?.draw || 0}-${stats.team_stats?.totals?.first_player_lost || 0}`}
-                                                            </span>
-                                                        </div>
-                                                        <span className="font-bold text-teal-700">{stats.second_player.name}</span>
-                                                    </div>
+                                                <HeadSummary
+                            homeTeam={stats.first_player.name}
+                            awayTeam={stats.second_player.name}
+                            homeColor="teal"
+                            awayColor="teal"
+                            homeScore={stats.team_stats?.totals.first_player_win}
+                            awayScore={stats.team_stats?.totals.first_player_lost}
+                            draw={stats.team_stats?.totals.draw}
+                        />
                                                     <div className="text-sm text-neutral-500">Team Matches</div>
                                                 </div>
                                                 <div className="flex flex-col items-center gap-2">
-                                                    <div className="flex items-center gap-4 text-xl">
-                                                        <span className="font-bold text-purple-700">{stats.first_player.name}</span>
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="px-4 py-2 bg-purple-50 rounded-full text-purple-700 font-medium">
-                                                                {`${stats.single_stats?.totals?.first_player_win || 0}-${stats.single_stats?.totals?.draw || 0}-${stats.single_stats?.totals?.first_player_lost || 0}`}
-                                                            </span>
-                                                        </div>
-                                                        <span className="font-bold text-purple-700">{stats.second_player.name}</span>
-                                                    </div>
+                                                <HeadSummary
+                            homeTeam={stats.first_player.name}
+                            awayTeam={stats.second_player.name}
+                            homeColor="purple"
+                            awayColor="purple"
+                            homeScore={stats.single_stats?.totals.first_player_win}
+                            awayScore={stats.single_stats?.totals.first_player_lost}
+                            draw={stats.single_stats?.totals.draw}
+                        />
                                                     <div className="text-sm text-neutral-500">Single Matches</div>
                                                 </div>
                                             </div>
-                                            <div className="w-full flex items-center gap-2 text-neutral-600 text-sm">
-                                                <TagIcon className="h-4 w-4 mt-0.5 text-teal-500" />
-                                                <span>Versions:</span>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {versions.filter(v => v.active).map((v, index) => (
-                                                        <Chip
-                                                            key={index}
-                                                            value={parseTag(v.name)}
-                                                            className="bg-teal-50 text-teal-600"
-                                                        />
-                                                    ))}
-                                                </div>
-                                            </div>
+                                            <TagSummary
+                            versions={versions}
+                            color="blue"
+                            label="Versions"
+                            icon={true}
+                          />
+
                                         </div>
 
                                         {/* Matches Tabs */}
@@ -234,30 +228,28 @@ export default function PlayerVersus({ players, current_version, start_at, end_a
                                                                                         </span>
                                                                                     )}
                                                                                 </div>
+                                                                                <div className="bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors">
                                                                                 {dateMatches.map((match, i) => {
-                                                                                    const {home_team_name, team_home_score, away_team_name, team_away_score} = match
-                                                                                    const isFirstPlayerWin = team_home_score > team_away_score
-                                                                                    const isDraw = team_home_score === team_away_score
+                                                                                    const {id, home_id, away_id, home_team_name, team_home_score, away_team_name, team_away_score, type} = match
+                                                                                    const team_home = home_id === stats.first_player.id ? home_team_name : away_team_name;
+                                                                                    const team_away = away_id === stats.first_player.id ? away_team_name : home_team_name;
 
                                                                                     return (
                                                                                         <div
-                                                                                            key={i}
-                                                                                            className="flex items-center justify-between p-3 bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors"
+                                                                                            key={id}
+                                                                                            className="flex items-center justify-between px-3 py-0.5"
                                                                                         >
                                                                                             <Score
-                                                                                                homeName={home_team_name}
-                                                                                                awayName={away_team_name}
+                                                                                                homeName={team_home}
+                                                                                                awayName={team_away}
                                                                                                 homeScore={team_home_score}
                                                                                                 awayScore={team_away_score}
-                                                                                                isHomeWinner={isFirstPlayerWin}
-                                                                                                isAwayWinner={!isFirstPlayerWin && !isDraw}
-                                                                                                isDraw={isDraw}
-                                                                                                homeColor="text-blue-600"
-                                                                                                awayColor="text-blue-600"
+                                                                                                tournamentType={type}
                                                                                             />
                                                                                         </div>
                                                                                     )
-                                                                                })}
+                                                                                  })}
+                                                                                  </div>
                                                                             </div>
                                                                         ))}
                                                                     </div>
@@ -312,30 +304,32 @@ export default function PlayerVersus({ players, current_version, start_at, end_a
                                                                                         </span>
                                                                                     )}
                                                                                 </div>
+
+                                                                                <div className="bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors">
                                                                                 {dateMatches.map((match, i) => {
-                                                                                    const {home_score, away_score} = match
-                                                                                    const isFirstPlayerWin = home_score > away_score
-                                                                                    const isDraw = home_score === away_score
+                                                                                    const {id, home_id, away_id, home_score, away_score, type, penalty_score} = match
+                                                                                    const team_home = home_id === stats.first_player.id ? stats.first_player.name : stats.second_player.name;
+                                                                                    const team_away = away_id === stats.first_player.id ? stats.first_player.name : stats.second_player.name;
 
                                                                                     return (
                                                                                         <div
-                                                                                            key={i}
-                                                                                            className="flex items-center justify-between p-2 bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors"
+                                                                                            key={id}
+                                                                                            className="flex items-center justify-between px-3 py-0.5"
                                                                                         >
                                                                                             <Score
-                                                                                                homeName={stats.first_player.name}
-                                                                                                awayName={stats.second_player.name}
+                                                                                                homeName={team_home}
+                                                                                                awayName={team_away}
                                                                                                 homeScore={home_score}
                                                                                                 awayScore={away_score}
-                                                                                                isHomeWinner={isFirstPlayerWin}
-                                                                                                isAwayWinner={!isFirstPlayerWin && !isDraw}
-                                                                                                isDraw={isDraw}
-                                                                                                homeColor="text-purple-600"
-                                                                                                awayColor="text-purple-600"
+                                                                                                homeColor="purple"
+                                                                                                awayColor="purple"
+                                                                                                tournamentType={type}
+                                                                                                penalty={penalty_score}
                                                                                             />
                                                                                         </div>
                                                                                     )
                                                                                 })}
+                                                                                </div>
                                                                             </div>
                                                                         ))}
                                                                     </div>

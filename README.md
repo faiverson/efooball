@@ -38,7 +38,7 @@ What to do with new games?
 - Make sure RESET_DATABASE=false and run the db:seed --class=GameSeeder
 
 What to do with a new version of the game?
-- You need to update the next files:
--- app/Enums/GameVersion.php
--- config/filters.php
--- resources/js/lib/enums.js
+- Team Stats: click on a team should show the game list
+- Dropdowns should accept search
+torneo 3 me esta dando el titulo a mi en vez de juan en resources/js/Hooks/useTournamentPositions.js 
+y es porque es el torneo de las dos semis
