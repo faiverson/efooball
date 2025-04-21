@@ -1,17 +1,26 @@
 import React, { useState } from 'react'
 import { Head } from '@inertiajs/react'
-import SingleTournament from '@/Components/SingleTournament'
-import SingleEightTournament from '@/Components/IndividualTournament/SingleEightTournament'
 import GuestLayout from '@/Layouts/GuestLayout';
-import { TrophyIcon, ChevronDownIcon, CalendarIcon } from '@heroicons/react/24/outline';
+import { TrophyIcon, ChevronDownIcon, CalendarIcon } from '@heroicons/react/24/outline'
 import { formatDate } from '@/lib/utils';
-import { useTournamentChampions } from '@/Hooks/useTournamentChampions';
-import Champions from '@/Components/Champions';
-import PositionsGrid from '@/Components/PositionsGrid';
+import { useTeamTournamentChampions } from '@/Hooks/useTeamTournamentChampions'
+import Champions from '@/Components/Champions'
+import TeamTournament from '@/Components/TeamTournament'
+import TeamPositionsGrid from '@/Components/TeamPositionsGrid';
 
 export default function Libertadores({tournaments}) {
     const [expandedTournaments, setExpandedTournaments] = useState(new Set());
-    const champions = useTournamentChampions(tournaments);
+
+    // we need to sort by match against for these tournaments, we are doing this by tournament name and manually adding the tournaments that need to be sorted by match against
+    const sortByMatchAgainst = [];
+
+    // Add drawResolution field to tournaments
+    tournaments = tournaments.map(tournament => ({
+      ...tournament,
+      drawResolution: sortByMatchAgainst.includes(tournament.name)
+    }));
+
+    const champions = useTeamTournamentChampions(tournaments);
 
     const toggleTournament = (tournamentId) => {
         const newExpanded = new Set(expandedTournaments);
@@ -44,7 +53,7 @@ export default function Libertadores({tournaments}) {
                                 <p className="text-gray-600">History of champions and tournament results</p>
                             </div>
 
-                            <PositionsGrid tournaments={tournaments} />
+                            <TeamPositionsGrid tournaments={tournaments} />
 
                             <div className="space-y-2">
                                 {tournaments.map(tournament => {
@@ -70,11 +79,7 @@ export default function Libertadores({tournaments}) {
                                             </button>
                                             {isExpanded && (
                                                 <div className="mt-2 bg-gradient-to-br from-white to-gray-50 rounded-lg shadow-lg p-6">
-                                                    {tournament.total_teams === 8 ? (
-                                                        <SingleEightTournament tournament={tournament} />
-                                                    ) : (
-                                                        <SingleTournament tournament={tournament} />
-                                                    )}
+                                                    <TeamTournament tournament={tournament} />
                                                 </div>
                                             )}
                                         </div>

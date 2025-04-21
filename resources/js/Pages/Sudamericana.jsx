@@ -1,73 +1,90 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Head } from '@inertiajs/react'
-import Tournament from '@/Components/Tournament'
 import GuestLayout from '@/Layouts/GuestLayout';
-import { TrophyIcon } from '@heroicons/react/24/outline';
+import { TrophyIcon, ChevronDownIcon, CalendarIcon } from '@heroicons/react/24/outline'
+import { formatDate } from '@/lib/utils';
+import { useTeamTournamentChampions } from '@/Hooks/useTeamTournamentChampions'
+import Champions from '@/Components/Champions'
+import TeamTournament from '@/Components/TeamTournament'
+import TeamPositionsGrid from '@/Components/TeamPositionsGrid';
 
 export default function Sudamericana({tournaments}) {
-    const champions = (tournaments.reduce((acc, tournament) => {
-        const champ = tournament.positions[0]
-        const idx = acc.findIndex(item => item.team === champ.team)
-        idx < 0 ? acc.push({team: champ.team, total: 1}) : acc[idx]['total'] += 1
-        return acc
-    }, [])).sort( (a, b) => a.total <= b.total ? 1 : -1)
+    const [expandedTournaments, setExpandedTournaments] = useState(new Set());
+
+    // we need to sort by match against for these tournaments, we are doing this by tournament name and manually adding the tournaments that need to be sorted by match against
+    const sortByMatchAgainst = [];
+
+    // Add drawResolution field to tournaments
+    tournaments = tournaments.map(tournament => ({
+      ...tournament,
+      drawResolution: sortByMatchAgainst.includes(tournament.name)
+    }));
+
+    const champions = useTeamTournamentChampions(tournaments);
+
+    const toggleTournament = (tournamentId) => {
+        const newExpanded = new Set(expandedTournaments);
+        if (newExpanded.has(tournamentId)) {
+            newExpanded.delete(tournamentId);
+        } else {
+            newExpanded.add(tournamentId);
+        }
+        setExpandedTournaments(newExpanded);
+    };
 
     return (
         <GuestLayout>
             <Head title="Sudamericana" />
-            <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100 py-8">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-8">
-                        <h1 className="text-3xl font-bold text-gray-900 mb-2">Sudamericana Tournament</h1>
-                        <p className="text-gray-600">History of champions and tournament results</p>
+            <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100 py-3">
+                <div className="flex">
+                    {/* Champions Sidebar */}
+                    <div className="w-60 flex-shrink-0 sticky top-0 h-screen overflow-y-auto pl-6">
+                        <Champions champions={champions} />
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        {/* Champions Section */}
-                        <div className="bg-white rounded-xl shadow-sm p-6 border border-neutral-200">
-                            <div className="flex items-center gap-2 mb-4">
-                                <TrophyIcon className="h-6 w-6 text-amber-500" />
-                                <h2 className="text-xl font-semibold text-gray-900">Champions</h2>
+                    {/* Main Content */}
+                    <div className="flex-1">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="text-center mb-3">
+                                <div className="flex items-center justify-center gap-2 mb-2">
+                                    <TrophyIcon className="w-8 h-8 text-gray-900" />
+                                    <h1 className="text-3xl font-bold text-gray-900">Sudamericana</h1>
+                                </div>
+                                <p className="text-gray-600">History of champions and tournament results</p>
                             </div>
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full divide-y divide-gray-200">
-                                    <thead>
-                                        <tr>
-                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Team</th>
-                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Titles</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white divide-y divide-gray-200">
-                                        {champions.map((champion, index) => {
-                                            const {team, total} = champion;
-                                            return (
-                                                <tr key={`${team}-${total}`} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                                                    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{team}</td>
-                                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{total}</td>
-                                                </tr>
-                                            )
-                                        })}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
 
-                        {/* Tournaments Section */}
-                        <div className="bg-white rounded-xl shadow-sm p-6 border border-neutral-200">
-                            <div className="flex items-center gap-2 mb-4">
-                                <TrophyIcon className="h-6 w-6 text-amber-500" />
-                                <h2 className="text-xl font-semibold text-gray-900">Tournaments</h2>
-                            </div>
-                            <div className="space-y-4">
-                                {tournaments.map(tournament => (
-                                    <div key={tournament.name} className="bg-gray-50 rounded-lg p-4">
-                                        <div className="flex justify-between items-center mb-3">
-                                            <h4 className="text-lg font-semibold text-gray-900">{tournament.name}</h4>
-                                            <span className="text-sm text-gray-500">Played: {tournament.played_at}</span>
+                            <TeamPositionsGrid tournaments={tournaments} />
+
+                            <div className="space-y-2">
+                                {tournaments.map(tournament => {
+                                    const isExpanded = expandedTournaments.has(tournament.id);
+                                    return (
+                                        <div key={tournament.id} className="w-full">
+                                            <button
+                                                onClick={() => toggleTournament(tournament.id)}
+                                                className="w-full bg-white rounded-lg shadow-md overflow-hidden"
+                                            >
+                                                <div className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-800 flex items-center justify-between">
+                                                    <div className="text-left">
+                                                        <h2 className="text-2xl font-bold text-white">{tournament.name}</h2>
+                                                        <div className="flex items-center gap-1 text-sm text-indigo-100">
+                                                            <CalendarIcon className="w-4 h-4" />
+                                                            <span>{formatDate(tournament.played_at)}</span>
+                                                        </div>
+                                                    </div>
+                                                    <ChevronDownIcon
+                                                        className={`w-6 h-6 text-white transform transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                                                    />
+                                                </div>
+                                            </button>
+                                            {isExpanded && (
+                                                <div className="mt-2 bg-gradient-to-br from-white to-gray-50 rounded-lg shadow-lg p-6">
+                                                    <TeamTournament tournament={tournament} />
+                                                </div>
+                                            )}
                                         </div>
-                                        <Tournament tournament={tournament.positions} />
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </div>
                     </div>

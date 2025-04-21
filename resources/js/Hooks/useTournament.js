@@ -33,7 +33,7 @@ export function useTournament(tournament) {
     const normalizedGames = useMemo(() => tournament.games.map(normalizeGame), [tournament.games, normalizeGame]);
 
     const { leagueGames, winnersBracket, losersBracket, standings } = splitTournamentGames(normalizedGames, {
-      total_teams: tournament.total_teams,
+        total_teams: tournament.total_teams,
         drawResolution: tournament.drawResolution,
     });
 
