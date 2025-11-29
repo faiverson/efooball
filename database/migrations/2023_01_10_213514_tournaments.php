@@ -20,7 +20,6 @@ return new class extends Migration
             $table->increments('id');
             $table->string('name');
             $table->json('games')->nullable(true);
-            $table->json('positions')->nullable(true);
             $table->enum('game_type', GameType::getValues());
             $table->enum('type', TournamentType::getValues());
             $table->enum('version', GameVersion::getValues());

@@ -43,7 +43,6 @@ class Tournament extends Model
         return $query->where('type', TournamentType::SUDAMERICANA);
     }
 
-
     public function scopeTorneo(Builder $query): Builder
     {
         return $query->where('type', TournamentType::TORNEO);
@@ -54,23 +53,8 @@ class Tournament extends Model
         return $query->where('type', TournamentType::COPA);
     }
 
-    protected function positions(): Attribute
+    public function scopeIndividual(Builder $query): Builder
     {
-        return Attribute::make(
-            get: function ($value, $attributes) {
-                $positions = (array) json_decode($attributes['positions'], false);
-                $positions = array_values($positions);
-                usort($positions, function (object $a, object $b) {
-                    if ($a->POINTS === $b->POINTS) {
-                        if ($a->DIF === $b->DIF) {
-                            return $a->GF <= $b->GF ? 1 : -1;
-                        }
-                        return $a->DIF < $b->DIF ? 1 : -1;
-                    }
-                    return $a->POINTS < $b->POINTS ? 1 : -1;
-                });
-                return $positions;
-            },
-        );
+        return $query->where('type', TournamentType::INDIVIDUAL);
     }
 }

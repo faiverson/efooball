@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\GameVersion;
+use App\Enums\TournamentType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
@@ -12,6 +13,7 @@ class Game extends Model
 
     protected $casts = [
       'version' => GameVersion::class,
+      'type' => TournamentType::class,
       'played_at' => 'date:Y-m-d'
     ];
 

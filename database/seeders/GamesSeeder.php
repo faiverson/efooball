@@ -28,7 +28,7 @@ class GamesSeeder extends Seeder
 
         if(env('RESET_DATABASE')) {
             Schema::disableForeignKeyConstraints();
-            DB::table('tournaments')->truncate();
+            Tournament::whereIn('type', [TournamentType::LIBERTADORES, TournamentType::SUDAMERICANA])->delete();
             DB::table('team_strikes')->truncate();
             DB::table('games')->truncate();
             Schema::enableForeignKeyConstraints();
@@ -99,7 +99,6 @@ class GamesSeeder extends Seeder
                     );
 
                     empty($selTournament->games) ? $selTournament->games = collect($game->getKey()): $selTournament->games->push($game->getKey());
-                    $selTournament->positions = $this->calculateTournamentPosition($selTournament->games);
                     $selTournament->save();
 
                     if($selTournament->id !== $t_id) {
@@ -138,47 +137,5 @@ class GamesSeeder extends Seeder
         }
 
         return number_format($number) . $suffix;
-    }
-
-    private function calculateTournamentPosition($games)
-    {
-        $eloquentGames = Game::with(['teamHome', 'teamAway'])->whereIntegerInRaw('id', $games->toArray())->get();
-        return $eloquentGames->reduce(function ($positions, $game) {
-            if(!array_key_exists($game->teamHome->id, $positions)) {
-                $positions[$game->teamHome->id] = (object)['TEAM' => $game->teamHome->name, 'POINTS' => 0, 'GP' => 0, 'W' => 0, 'D' => 0, 'L' => 0, 'GF' => 0, 'GC' => 0, 'DIF' => 0];;
-            }
-            if(!array_key_exists($game->teamAway->id, $positions)) {
-                $positions[$game->teamAway->id] = (object)['TEAM' => $game->teamAway->name, 'POINTS' => 0, 'GP' => 0, 'W' => 0, 'D' => 0, 'L' => 0, 'GF' => 0, 'GC' => 0, 'DIF' => 0];;
-            }
-
-            $local = $positions[$game->teamHome->id];
-            $away = $positions[$game->teamAway->id];
-
-            $local->GP += 1;
-            $local->GF += $game->team_home_score;
-            $local->GC += $game->team_away_score;
-            $local->DIF += ($game->team_home_score - $game->team_away_score);
-            $away->GP += 1;
-            $away->GF += $game->team_away_score;
-            $away->GC += $game->team_home_score;
-            $away->DIF += ($game->team_away_score - $game->team_home_score);
-
-            if($game->team_home_score > $game->team_away_score) {
-                $local->POINTS += 3;
-                $local->W += 1;
-                $away->L += 1;
-            } elseif($game->team_home_score === $game->team_away_score) {
-                $local->POINTS += 1;
-                $away->POINTS += 1;
-                $local->D += 1;
-                $away->D += 1;
-            } else {
-                $away->POINTS += 3;
-                $away->W += 1;
-                $local->L += 1;
-            };
-
-            return $positions;
-        }, []);
     }
 }

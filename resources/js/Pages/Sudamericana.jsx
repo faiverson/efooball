@@ -1,61 +1,94 @@
-import React from 'react'
-import { Head } from '@inertiajs/inertia-react'
-import Tournament from '@/Components/Tournament'
+import React, { useState } from 'react'
+import { Head } from '@inertiajs/react'
 import GuestLayout from '@/Layouts/GuestLayout';
-
+import { TrophyIcon, ChevronDownIcon, CalendarIcon } from '@heroicons/react/24/outline'
+import { formatDate } from '@/lib/utils';
+import { useTeamTournamentChampions } from '@/Hooks/useTeamTournamentChampions'
+import Champions from '@/Components/Champions'
+import TeamTournament from '@/Components/TeamTournament'
+import TeamPositionsGrid from '@/Components/TeamPositionsGrid';
 
 export default function Sudamericana({tournaments}) {
+    const [expandedTournaments, setExpandedTournaments] = useState(new Set());
 
-    const champions = (tournaments.reduce((acc, tournament) => {
-        const champ = tournament.positions[0]
-        const idx = acc.findIndex(item => item.team === champ.team)
-        idx < 0 ? acc.push({team: champ.team, total: 1}) : acc[idx]['total'] += 1
-        return acc
-    }, [])).sort( (a, b) => a.total <= b.total ? 1 : -1)
+    // we need to sort by match against for these tournaments, we are doing this by tournament name and manually adding the tournaments that need to be sorted by match against
+    const sortByMatchAgainst = [];
+
+    // Add drawResolution field to tournaments
+    tournaments = tournaments.map(tournament => ({
+      ...tournament,
+      drawResolution: sortByMatchAgainst.includes(tournament.name)
+    }));
+
+    const champions = useTeamTournamentChampions(tournaments);
+
+    const toggleTournament = (tournamentId) => {
+        const newExpanded = new Set(expandedTournaments);
+        if (newExpanded.has(tournamentId)) {
+            newExpanded.delete(tournamentId);
+        } else {
+            newExpanded.add(tournamentId);
+        }
+        setExpandedTournaments(newExpanded);
+    };
 
     return (
         <GuestLayout>
-            <Head title="Libertadores" />
-            <div className='mt-8 flex flex-row gap-12'>
-                <section className="flex flex-col">
-                    <article>
-                        <h2 className='font-bold text-main-yellow text-xl text-center mb-2'>CHAMPIONS</h2>
-                        <table className="table-auto border-collapse">
-                            <thead>
-                            <tr>
-                                <th className='border-b font-bold pb-2 text-white-400 text-left'>Team</th>
-                                <th className='border-b font-bold pb-2 text-white-400 text-left'>Titles</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            { Object.values(champions).map( champion => {
-                                const {team, total} = champion;
-                                return (
-                                    <tr key={team}>
-                                        <td className='border-b font-semibold p-2 text-yellow-200 text-left'>{team}</td>
-                                        <td className='border-b font-semibold p-2 text-yellow-200 text-left'>{total}</td>
-                                    </tr>
-                                )
-                            })}
-                            </tbody>
-                        </table>
-                    </article>
-                </section>
-                <section className="flex flex-col">
-                    {
-                        tournaments.map(tournament => {
-                            return (
-                                <article key={tournament.name} className='my-4'>
-                                    <div className='flex justify-between mb-2 bg-gray-400 text-blue-600 rounded-md px-4 py-2 items-center'>
-                                        <h4 className='text-xl'>{tournament.name}</h4>
-                                        <h6 className='text-xs text-right'>Played: {tournament.played_at}</h6>
-                                    </div>
-                                    <Tournament tournament={tournament.positions} />
-                                </article>
-                            )
-                        })
-                    }
-                </section>
+            <Head title="Sudamericana" />
+            <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100 py-3">
+                <div className="flex">
+                    {/* Champions Sidebar */}
+                    <div className="w-60 flex-shrink-0 sticky top-0 h-screen overflow-y-auto pl-6">
+                        <Champions champions={champions} />
+                    </div>
+
+                    {/* Main Content */}
+                    <div className="flex-1">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="text-center mb-3">
+                                <div className="flex items-center justify-center gap-2 mb-2">
+                                    <TrophyIcon className="w-8 h-8 text-gray-900" />
+                                    <h1 className="text-3xl font-bold text-gray-900">Sudamericana</h1>
+                                </div>
+                                <p className="text-gray-600">History of champions and tournament results</p>
+                            </div>
+
+                            <TeamPositionsGrid tournaments={tournaments} />
+
+                            <div className="space-y-2">
+                                {tournaments.map(tournament => {
+                                    const isExpanded = expandedTournaments.has(tournament.id);
+                                    return (
+                                        <div key={tournament.id} className="w-full">
+                                            <button
+                                                onClick={() => toggleTournament(tournament.id)}
+                                                className="w-full bg-white rounded-lg shadow-md overflow-hidden"
+                                            >
+                                                <div className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-800 flex items-center justify-between">
+                                                    <div className="text-left">
+                                                        <h2 className="text-2xl font-bold text-white">{tournament.name}</h2>
+                                                        <div className="flex items-center gap-1 text-sm text-indigo-100">
+                                                            <CalendarIcon className="w-4 h-4" />
+                                                            <span>{formatDate(tournament.played_at)}</span>
+                                                        </div>
+                                                    </div>
+                                                    <ChevronDownIcon
+                                                        className={`w-6 h-6 text-white transform transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                                                    />
+                                                </div>
+                                            </button>
+                                            {isExpanded && (
+                                                <div className="mt-2 bg-gradient-to-br from-white to-gray-50 rounded-lg shadow-lg p-6">
+                                                    <TeamTournament tournament={tournament} />
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </GuestLayout>
     );

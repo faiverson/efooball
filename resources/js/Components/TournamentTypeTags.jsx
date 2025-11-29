@@ -1,5 +1,6 @@
 import {useState, useEffect} from "react"
 import { List, ListItem, ListItemPrefix, Checkbox, Typography } from "@material-tailwind/react";
+import VersionTag from "./VersionTag";
 
 function TournamentTypeTag({name, status, onChange}) {
   const [tag, setTag] = useState(status)
@@ -35,13 +36,13 @@ function TournamentTypeTag({name, status, onChange}) {
 
 export default function TournamentTypeTags({tournamentTypes, onChange}) {
   return (
-    <List>
+    <List className="p-0">
         {
           tournamentTypes.map( item => {
             const {name, active} = item;
             return (
               <ListItem key={name}  className="p-0 hover:bg-yellow-dark-alternative focus:bg-yellow-dark-alternative active:bg-yellow-dark-alternative">
-                <TournamentTypeTag status={active} name={name} onChange={onChange} />
+                <VersionTag status={active} name={name} onChange={onChange} />
               </ListItem>
             )
           })

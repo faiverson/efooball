@@ -1,116 +1,228 @@
 import React, { useState } from 'react'
-import axios from '@/lib/axios'
-import { DateTime } from 'luxon'
 import { Head } from '@inertiajs/react'
-import { GameVersion } from '@/lib/enums'
-import TeamFilters from '@/Components/TeamFilters'
-import TeamDropdown from '@/Components/TeamDropdown'
+import StatsFilters from '@/Components/StatsFilters'
 import GuestLayout from '@/Layouts/GuestLayout';
-import { Button } from "@material-tailwind/react";
+import { Accordion, AccordionHeader, AccordionBody, Chip } from "@material-tailwind/react";
+import { useStatsFilterForm } from '@/Hooks/useStatsFilterForm';
+import { TrophyIcon, CalendarIcon, ScaleIcon, TagIcon } from "@heroicons/react/24/outline";
+import { parseTag, groupMatchesByVersion, groupMatchesByDate, formatDate } from '@/lib/utils';
+import SelectionSection from '@/Components/SelectionSection';
+import Score from '@/Components/Score';
+import HeadSummary from '@/Components/HeadSummary';
+import TagSummary from '@/Components/TagSummary';
 
-export default function TeamVersus({ teams, current_version, start_at, end_at}) {
+export default function TeamVersus({ teams, current_version, start_at, end_at, min_amount }) {
   const local_teams = teams.map(team => ({...team, id: String(team.id), players: team.players.map(p => p.id)}));
 
-    const [data, setData] = useState()
-    const [first_team, setFirstTeam] = useState('-1')
-    const [second_team, setSecondTeam] = useState('-1')
-    const [away_teams, setAwayTeams] = useState([])
-    const [versions, setVersions] = useState(Object.keys(GameVersion).map(item => ({active: current_version === item.toLowerCase(), name: item})))
-    const [from_at, setFromAt] = useState(DateTime.fromFormat(start_at, 'yyyy-MM-dd'))
-    const [until_at, setUntilAt] = useState(DateTime.fromFormat(end_at, 'yyyy-MM-dd'))
+  const [first_team, setFirstTeam] = useState('-1')
+  const [second_team, setSecondTeam] = useState('-1')
+  const [away_teams, setAwayTeams] = useState([])
+  const [showErrors, setShowErrors] = useState(false)
+  const [openAccordion, setOpenAccordion] = useState(1);
 
-    const onChangeTag = tag => {
-        const newVersions = [...versions]
-        const idx = newVersions.findIndex(item => item.name === tag)
-        newVersions[idx].active = !newVersions[idx].active
-        setVersions(newVersions)
+  const {
+    stats,
+    versions,
+    tournamentTypes,
+    minGames,
+    from_at,
+    until_at,
+    onChangeTag,
+    onChangeModality,
+    onChangeMinGames,
+    handleChange,
+    onSubmit
+  } = useStatsFilterForm({
+    baseUrl: 'team_versus',
+    current_version,
+    start_at,
+    end_at,
+    min_amount
+  });
+
+  const handleSubmit = (ev) => {
+    ev.preventDefault();
+
+    if (first_team === '-1' || second_team === '-1') {
+      setShowErrors(true);
+      return;
     }
 
-    const handleChange = (ev, field) => {
-      ev.preventDefault()
-      let value = ev.target.value;
-      const date = value ? DateTime.fromFormat(value, 'yyyy-MM-dd') : null
-      if(field === 'from_at') {
-        setFromAt(date)
-      } else if(field === 'until_at') {
-        setUntilAt(date)
-      }
-    }
-
-    const onSubmit = async ev => {
-        ev.preventDefault()
-        let filters = {
-          first_team_id: first_team,
-          second_team_id: second_team,
-        }
-        const selected_versions = versions.filter(item => item.active).map(item => item.name).join(',');
-
-        if(!!versions) {
-            filters.versions = selected_versions;
-        }
-
-        if(!!from_at) {
-            filters.start_at = from_at.toFormat('yyyy-MM-dd');
-        }
-
-        if(!!until_at) {
-          filters.until_at = until_at.toFormat('yyyy-MM-dd');
-        }
-
-        const response = await axios.post(`/team_versus`, filters)
-            .then(res => res.data)
-            .catch(error => console.log(error));
-
-        setData(response?.data)
-    }
+    const teamFilters = `first_team_id=${first_team}&second_team_id=${second_team}`;
+    onSubmit(ev, teamFilters);
+  };
 
     const handleLocalTeam = id => {
       setFirstTeam(id)
       const idx = local_teams.findIndex(item => item.id === id);
-      const away = local_teams.filter(team => !team.players.some(player_id => local_teams[idx].players.includes(player_id)))
+    const away = local_teams && local_teams.filter(team => !team.players.some(player_id => local_teams[idx].players.includes(player_id)))
       setSecondTeam('-1')
       setAwayTeams(away);
-    }
+    setShowErrors(false)
+  }
 
-    const handleAwayTeam = id => setSecondTeam(id);
+  const handleAwayTeam = id => {
+    setSecondTeam(id)
+    setShowErrors(false)
+  }
+
+  const handleAccordion = (value) => {
+    setOpenAccordion(openAccordion === value ? 0 : value);
+  };
 
     return (
         <GuestLayout>
             <Head><title>Team Head to Head</title></Head>
-            <div className="flex flex-col justify-start gap-2 md:flex-col p-2 md:w-80 md:p-8">
-              <TeamFilters inputs={{versions, from_at, until_at }} methods={{onChangeTag, handleChange}} />
-            </div>
-            <div className="flex flex-col w-full">
-              <div className="flex flex-row items-start gap-4 justify-center">
-                <div className="w-3/12"><TeamDropdown name="local_team" teams={local_teams} selected={first_team} onChange={handleLocalTeam} /></div>
-                <div className="w-3/12"><TeamDropdown name="away_team" teams={away_teams} selected={second_team} onChange={handleAwayTeam} /></div>
-                <div className="w-2/12"><Button onClick={onSubmit} variant="filled" color="yellow">Okay</Button></div>
-              </div>
-              {!!data &&
-                <section className="flex flex-col gap-4 w-full mt-8">
-                  <div className="flex flex-row text-main-yellow gap-2 text-xl w-full justify-center">
-                    {
-                      data.totals.total > 0
-                      ? <>
-                          <div>{data.first_team.name}</div>
-                          <div>{`${data.totals.first_team_win}-${data.totals.draw}-${data.totals.first_team_lost}`}</div>
-                          <div>{data.second_team.name}</div>
-                          </>
-                      : <div className="orange text-lg">No matches between {data.first_team.name} and {data.second_team.name}</div>
-                    }
+      <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100 py-2">
+        <div className="flex">
+          {/* Sidebar with Filters */}
+          <div className="w-72 flex-shrink-0 sticky top-0 h-screen overflow-y-auto">
+            <StatsFilters
+              versions={versions}
+              minGames={minGames}
+              from_at={from_at}
+              until_at={until_at}
+              tournamentTypes={tournamentTypes}
+              onChangeTag={onChangeTag}
+              onChangeMinGames={onChangeMinGames}
+              handleChange={handleChange}
+              onChangeModality={onChangeModality}
+              onSubmit={handleSubmit}
+              filterType="team"
+            />
+          </div>
 
+          {/* Main Content */}
+          <div className="flex-1">
+            <div className="flex flex-col items-center gap-4 p-4">
+              <SelectionSection
+                local_teams={local_teams}
+                away_teams={away_teams}
+                first_team={first_team}
+                second_team={second_team}
+                showErrors={showErrors}
+                handleLocalTeam={handleLocalTeam}
+                handleAwayTeam={handleAwayTeam}
+                handleSubmit={handleSubmit}
+              />
+
+              {/* Results Section */}
+              { stats?.first_team && stats?.second_team && (
+                <div className="w-full max-w-4xl bg-white/95 backdrop-blur-sm rounded-2xl shadow-lg px-8 py-4 border border-neutral-200 mt-2 relative z-0">
+                  <div className="flex flex-col gap-6">
+                    {stats?.games?.length > 0 && (
+                      <>
+                      {/* Head to Head Summary */}
+                    <div className="flex flex-col items-center gap-4">
+                        <div className="flex items-center gap-2 text-teal-600">
+                          <TrophyIcon className="h-6 w-6" />
+                          <h4 className="text-xl font-semibold">Head to Head Summary</h4>
+                        </div>
+                        <HeadSummary
+                            homeTeam={stats.first_team.name}
+                            awayTeam={stats.second_team.name}
+                            homeColor="teal"
+                            awayColor="teal"
+                            homeScore={stats.totals.first_team_win}
+                            awayScore={stats.totals.first_team_lost}
+                            draw={stats.totals.draw}
+                        />
+                        <TagSummary
+                            versions={versions}
+                            color="teal"
+                            label="Versions"
+                            icon={true}
+                          />
+                    </div>
+
+                    {/* Match History */}
+                    <div className="flex items-center gap-2 text-blue-600">
+                      <CalendarIcon className="h-6 w-6" />
+                      <h4 className="text-xl font-semibold">Match History</h4>
+                      <span className="text-sm text-blue-500 font-semibold">
+                        ({stats.games.length} matches)
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-4">
+                      <div className="flex flex-col gap-2">
+                        {Object.entries(groupMatchesByVersion(stats.games)).map(([version, matches], index) => (
+                          <Accordion
+                            key={version}
+                            open={openAccordion === index + 1}
+                            className="border border-neutral-200 rounded-lg overflow-hidden"
+                          >
+                            <AccordionHeader
+                              onClick={() => handleAccordion(index + 1)}
+                              className="bg-blue-50 px-4 py-3 hover:bg-blue-100"
+                            >
+                              <div className="flex items-center gap-2 text-blue-700">
+                                <TagIcon className="h-5 w-5" />
+                                <span className="font-semibold uppercase">{parseTag(version)}</span>
+                                <span className="text-sm text-blue-500 font-semibold ml-2">
+                                  ({matches.length} matches)
+                                </span>
+                              </div>
+                            </AccordionHeader>
+                            <AccordionBody className="px-0">
+                              <div className="grid gap-2 p-2">
+                                {Object.entries(groupMatchesByDate(matches)).map(([date, dateMatches]) => (
+                                  <div key={date} className="flex flex-col gap-2">
+                                    <div className="flex items-center justify-end gap-2 text-neutral-500 text-sm">
+                                      <span>{formatDate(date)}</span>
+                                      <CalendarIcon className="h-4 w-4" />
+                                      {dateMatches.length > 1 && (
+                                        <span className="text-xs bg-blue-50 text-blue-500 px-1.5 py-0.5 rounded-full">
+                                          {dateMatches.length} matches
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors">
+                                    {dateMatches.map((match, i) => {
+                                      const {id, team_home_id, team_away_id, team_home_score, team_away_score, type} = match
+                                      const team_home = team_home_id === stats.first_team.id ? stats.first_team.name : stats.second_team.name;
+                                      const team_away = team_away_id === stats.first_team.id ? stats.first_team.name : stats.second_team.name;
+
+                                      return (
+                                        <div
+                                        key={id}
+                                          className="flex items-center justify-between"
+                                        >
+                                          <Score
+                                            homeName={team_home}
+                                            awayName={team_away}
+                                            homeScore={team_home_score}
+                                            awayScore={team_away_score}
+                                            homeColor="blue"
+                                            awayColor="blue"
+                                            tournamentType={type}
+                                          />
+                                        </div>
+                                      )
+                                    })}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </AccordionBody>
+                          </Accordion>
+                        ))}
+                      </div>
+                    </div>
+                      </>
+)}
+{stats?.games?.length === 0 && (
+                      <div className="text-center py-8">
+                        <div className="flex flex-col items-center gap-2 text-neutral-600">
+                          <ScaleIcon className="h-8 w-8" />
+                          <p className="text-lg">No matches between {stats.first_team.name} and {stats.second_team.name}</p>
+                        </div>
+                        </div>)}
                   </div>
-                  <div className="flex flex-col text-main-yellow row-gap-2">
-                    { data.games.map((item, i) => {
-                      const {team_home_score, team_away_score, played_at} = item
-                      return (
-                          <div key={i} className="text-center">{data.first_team.name} {team_home_score}-{team_away_score} {data.second_team.name} ({played_at})</div>
-                      )
-                    })
-                    }
-                  </div>
-                </section>
-              }
+                </div>
+                      )}
+            </div>
+          </div>
+        </div>
             </div>
         </GuestLayout>
     );

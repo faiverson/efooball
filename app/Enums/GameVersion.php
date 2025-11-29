@@ -15,5 +15,5 @@ final class GameVersion extends Enum
     public const EFOOTBALL_2022 = 'efootball_2022';
     public const EFOOTBALL_2023 = 'efootball_2023';
     public const EFOOTBALL_2024 = 'efootball_2024';
-    public const EFOOTBALL_2025 = 'efootball_2025';
+    public const EFOOTBALL_v4 = 'efootball_v4';
 }
