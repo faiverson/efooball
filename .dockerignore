@@ -17,5 +17,8 @@ npm-debug.log
 yarn-error.log
 /.fleet
 /.idea
-
 google.json
+.git
+.gitignore
+Dockerfile
+fly.toml

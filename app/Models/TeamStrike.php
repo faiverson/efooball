@@ -11,6 +11,8 @@ class TeamStrike extends Model
 
     public $timestamps = false;
 
+    protected $fillable = ['team_id', 'start_at'];
+
     protected $casts = [
         'strike' => 'integer',
         'winning_strikes' => 'integer',
