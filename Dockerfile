@@ -33,7 +33,7 @@ ADD .fly/php/packages/${PHP_VERSION}.txt /tmp/php-packages.txt
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends gnupg2 ca-certificates git-core curl zip unzip \
-    rsync vim-tiny htop sqlite3 nginx supervisor cron software-properties-common \
+    rsync vim-tiny htop sqlite3 nginx supervisor cron software-properties-common postgresql-client \
     && ln -sf /usr/bin/vim.tiny /etc/alternatives/vim \
     && ln -sf /etc/alternatives/vim /usr/bin/vim \
     && LC_ALL=C.UTF-8 add-apt-repository ppa:ondrej/php -y \

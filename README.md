@@ -9,18 +9,31 @@
 
 ## Deployment
 
-Use docker compose to build the image and later run npm install and npm run dev for the front end
+To deploy the application, simply run:
 
-## Create the Database
+```bash
+fly deploy
+```
 
-- migrate command first
-- run seeders (if you want truncate all data first, add env var RESET_DATABASE=true)
+This command will:
+
+1. Build the Docker image.
+2. Run migrations (`php artisan migrate --force`).
+3. Run seeders (`php artisan db:seed --force`).
+
+### Database Dump
+
+The application includes a full database dump located at `database/snapshots/full_dump.sql`.
+
+- **On Deployment**: The `DatabaseSeeder` checks for this file. If it exists, it loads the dump using `psql`. If it doesn't exist, it runs the standard seeders.
+- **Updating the Dump**: To update the dump, run `php artisan db:snapshot-seeds` locally and commit the changes to `database/snapshots/full_dump.sql`.
+- **Deleting the Dump**: If you want to stop using the dump and revert to standard seeders, simply delete the file `database/snapshots/full_dump.sql` from the repository and commit the deletion.
 
 ## About Martes de PES
 
-- The last thing is done was the Team Stats and 
+- The last thing is done was the Team Stats and
 
-- Next Step is to check: 
+- Next Step is to check:
 
 - Random: do the random and send to telegram
 
@@ -35,10 +48,12 @@ Use docker compose to build the image and later run npm install and npm run dev 
 ## FAQ
 
 What to do with new games?
+
 - Make sure RESET_DATABASE=false and run the db:seed --class=GameSeeder
 
 What to do with a new version of the game?
+
 - Team Stats: click on a team should show the game list
 - Dropdowns should accept search
-torneo 3 me esta dando el titulo a mi en vez de juan en resources/js/Hooks/useTournamentPositions.js 
-y es porque es el torneo de las dos semis
+  torneo 3 me esta dando el titulo a mi en vez de juan en resources/js/Hooks/useTournamentPositions.js
+  y es porque es el torneo de las dos semis

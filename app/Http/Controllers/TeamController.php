@@ -140,18 +140,18 @@ class TeamController extends Controller
         $game_table = (new Game())->getTable();
 
         $query->select(["$team_table.name"]);
-        $query->selectRaw("COUNT(`g`.`id`) as total");
-        $query->selectRaw("SUM(CASE WHEN (`g`.`team_home_id` = `teams`.`id` AND `g`.`team_home_score` > `g`.`team_away_score`) THEN 1
-                                              WHEN (`g`.`team_away_id` = `teams`.`id` AND `g`.`team_home_score` < `g`.`team_away_score`) THEN 1
+        $query->selectRaw("COUNT(g.id) as total");
+        $query->selectRaw("SUM(CASE WHEN (g.team_home_id = teams.id AND g.team_home_score > g.team_away_score) THEN 1
+                                              WHEN (g.team_away_id = teams.id AND g.team_home_score < g.team_away_score) THEN 1
                                               ELSE 0 END) as win");
-        $query->selectRaw("SUM(CASE WHEN `g`.`team_home_score` = `g`.`team_away_score` THEN 1 ELSE 0 END) as draw");
-        $query->selectRaw("SUM(CASE WHEN (`g`.`team_home_id` = `teams`.`id` AND `g`.`team_home_score` < `g`.`team_away_score`) THEN 1
-                                              WHEN (`g`.`team_away_id` = `teams`.`id` AND `g`.`team_home_score` > `g`.`team_away_score`) THEN 1
+        $query->selectRaw("SUM(CASE WHEN g.team_home_score = g.team_away_score THEN 1 ELSE 0 END) as draw");
+        $query->selectRaw("SUM(CASE WHEN (g.team_home_id = teams.id AND g.team_home_score < g.team_away_score) THEN 1
+                                              WHEN (g.team_away_id = teams.id AND g.team_home_score > g.team_away_score) THEN 1
                                               ELSE 0 END) as lost");
 
-        $query->selectRaw("CAST(((SUM(CASE WHEN (`g`.`team_home_id` = `teams`.`id` AND `g`.`team_home_score` > `g`.`team_away_score`) THEN 3
-                                              WHEN (`g`.`team_away_id` = `teams`.`id` AND `g`.`team_home_score` < `g`.`team_away_score`) THEN 3
-                                              WHEN `g`.`team_home_score` = `g`.`team_away_score` THEN 1 END) / (COUNT(`g`.`id`) * 3)) * 100) AS DECIMAL(8,2))
+        $query->selectRaw("CAST(((SUM(CASE WHEN (g.team_home_id = teams.id AND g.team_home_score > g.team_away_score) THEN 3
+                                              WHEN (g.team_away_id = teams.id AND g.team_home_score < g.team_away_score) THEN 3
+                                              WHEN g.team_home_score = g.team_away_score THEN 1 END) * 1.0 / (COUNT(g.id) * 3)) * 100) AS DECIMAL(8,2))
                                               as average");
 
         $query->join("$game_table AS g", function (JoinClause $join) use ($team_table) {
@@ -173,7 +173,7 @@ class TeamController extends Controller
         }
 
         $query->groupBy(["$team_table.name", "$team_table.id"]);
-        $query->havingRaw('COUNT(`g`.`id`) >= ?',  [$min_amount]);
+        $query->havingRaw('COUNT(g.id) >= ?',  [$min_amount]);
         $query->orderByRaw('average DESC');
         return $query;
     }
@@ -242,7 +242,6 @@ class TeamController extends Controller
             $query->whereBetween('played_at', [$start_at, $end_at]);
         }
 
-        $query->orderByDesc('id');
         return $query;
     }
 

@@ -99,7 +99,7 @@ export default function TeamStats({ data, current_version, start_at, end_at, min
                                                             </td>
                                                             <td className="py-4 px-6 text-center">
                                                                 <div className="inline-flex items-center justify-center">
-                                                                    <div className="bg-primary-50 rounded-full px-4 py-1 shadow-sm border border-primary-200">
+                                                                    <div className="bg-primary-50 rounded-full px-4 py-1 shadow-sm border border-primary-200 whitespace-nowrap">
                                                                         <span className="text-sm font-medium text-primary-700">
                                                                             {record}
                                                                         </span>

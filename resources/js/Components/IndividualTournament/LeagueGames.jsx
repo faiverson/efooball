@@ -1,6 +1,7 @@
+import { ChevronDownIcon } from '@heroicons/react/24/outline';
+import { Accordion, AccordionBody, AccordionHeader } from '@material-tailwind/react';
 import { useState } from 'react';
-import { Accordion, AccordionHeader, AccordionBody } from "@material-tailwind/react";
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
+
 import Score from '@/Components/Score';
 
 export default function LeagueGames({ leagueGames, total_teams }) {
@@ -36,16 +37,15 @@ export default function LeagueGames({ leagueGames, total_teams }) {
                                 <span>Round {round}</span>
                             </div>
                             <div className="bg-blue-50 rounded-lg px-2 py-1 hover:bg-blue-100">
-                                {games.map((game) =>  (
-                                                <Score
-                                                    key={game.id}
-                                                    homeName={game.team_home.name}
-                                                    awayName={game.team_away.name}
-                                                    homeScore={game.team_home_score}
-                                                    awayScore={game.team_away_score}
-                                                />
-                                    )
-                                )}
+                                {games.map((game) => (
+                                    <Score
+                                        key={game.id}
+                                        homeName={game.team_home.name}
+                                        awayName={game.team_away.name}
+                                        homeScore={game.team_home_score}
+                                        awayScore={game.team_away_score}
+                                    />
+                                ))}
                             </div>
                         </div>
                     ))}
@@ -58,7 +58,9 @@ export default function LeagueGames({ leagueGames, total_teams }) {
 function groupMatchesByRound(games, total_teams) {
     const rounds = {};
     const gamesPerRound = Math.floor(total_teams / 2);
-    const totalRounds = total_teams === 7 ? total_teams : total_teams - 1;
+    // Calculate total rounds based on total games and games per round
+    // This supports both single round robin (Individual) and double round robin (Groups)
+    const totalRounds = Math.ceil(games.length / gamesPerRound);
 
     // Initialize all rounds
     for (let i = 1; i <= totalRounds; i++) {

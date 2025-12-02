@@ -62,13 +62,16 @@ class GamesSeeder extends Seeder
             }
 
             $players = explode('/', $home);
+            $players = array_map(function($p) { return ucwords(strtolower($p)); }, $players);
             sort($players);
             $home = Team::where('name', "{$players[0]}-{$players[1]}")->first();
+            
             $players = explode('/', $away);
+            $players = array_map(function($p) { return ucwords(strtolower($p)); }, $players);
             sort($players);
             $away = Team::where('name', "{$players[0]}-{$players[1]}")->first();
             if(empty($home) || empty($away)) {
-              $this->command->error('Missing teams', $row);
+              $this->command->error('Missing teams: ' . json_encode($row));
               throw new \Exception('Missing Team');
             }
 

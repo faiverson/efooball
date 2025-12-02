@@ -25,12 +25,12 @@ export default function PlayerChip({type, player, selected, onChange}) {
   }
 
   const attributes = {
+    onClick: ev => onClick(ev, type, player),
     ...(selected && {
         dismissible: {
           onClose: ev => onClick(ev, type, player),
         },
     }),
-    ...(!selected && {onClick: ev => onClick(ev, type, player)})
   }
 
   return (
