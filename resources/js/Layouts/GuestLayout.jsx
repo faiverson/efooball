@@ -71,36 +71,7 @@ export default function Guest({ user, children }) {
                     </>
                   )}
                 </Link>
-              ) : (
-                <>
-                  <Link
-                    href={route('login')}
-                    className={`relative group px-4 py-2 transition-all duration-200 whitespace-nowrap
-                      ${route().current('login')
-                        ? 'text-primary-600 font-bold'
-                        : 'text-primary-600 hover:text-primary-700'}`}
-                  >
-                    <span className="relative z-10">Log in</span>
-                    {route().current('login') ? (
-                      <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary-600"></span>
-                    ) : (
-                      <>
-                        <span className="absolute inset-0 bg-primary-50/50 rounded-lg transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left"></span>
-                        <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left"></span>
-                      </>
-                    )}
-                  </Link>
-                  <Link
-                    href={route('register')}
-                    className={`px-4 py-2 rounded-lg transition-all duration-200 font-medium whitespace-nowrap
-                      ${route().current('register')
-                        ? 'bg-primary-600 text-white'
-                        : 'bg-primary-500 text-white hover:bg-primary-600'}`}
-                  >
-                    Register
-                  </Link>
-                </>
-              )}
+              ) : null}
             </div>
 
             {/* Mobile menu button */}

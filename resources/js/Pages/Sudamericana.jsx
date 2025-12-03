@@ -10,17 +10,26 @@ import TeamPositionsGrid from '@/Components/TeamPositionsGrid';
 
 export default function Sudamericana({tournaments}) {
     const [expandedTournaments, setExpandedTournaments] = useState(new Set());
+    const [selectedVersions, setSelectedVersions] = useState([]);
 
     // we need to sort by match against for these tournaments, we are doing this by tournament name and manually adding the tournaments that need to be sorted by match against
     const sortByMatchAgainst = [];
 
     // Add drawResolution field to tournaments
-    tournaments = tournaments.map(tournament => ({
+    const processedTournaments = tournaments.map(tournament => ({
       ...tournament,
       drawResolution: sortByMatchAgainst.includes(tournament.name)
     }));
 
-    const champions = useTeamTournamentChampions(tournaments);
+    // Extract unique versions
+    const versions = [...new Set(processedTournaments.map(t => t.version).filter(Boolean))];
+
+    // Filter tournaments based on selection
+    const filteredTournaments = selectedVersions.length === 0 
+        ? processedTournaments 
+        : processedTournaments.filter(t => selectedVersions.includes(t.version));
+
+    const champions = useTeamTournamentChampions(filteredTournaments);
 
     const toggleTournament = (tournamentId) => {
         const newExpanded = new Set(expandedTournaments);
@@ -30,6 +39,14 @@ export default function Sudamericana({tournaments}) {
             newExpanded.add(tournamentId);
         }
         setExpandedTournaments(newExpanded);
+    };
+
+    const toggleVersion = (version) => {
+        if (selectedVersions.includes(version)) {
+            setSelectedVersions(selectedVersions.filter(v => v !== version));
+        } else {
+            setSelectedVersions([...selectedVersions, version]);
+        }
     };
 
     return (
@@ -53,10 +70,10 @@ export default function Sudamericana({tournaments}) {
                                 <p className="text-gray-600">History of champions and tournament results</p>
                             </div>
 
-                            <TeamPositionsGrid tournaments={tournaments} />
+                            <TeamPositionsGrid tournaments={filteredTournaments} />
 
                             <div className="space-y-2">
-                                {tournaments.map(tournament => {
+                                {filteredTournaments.map(tournament => {
                                     const isExpanded = expandedTournaments.has(tournament.id);
                                     return (
                                         <div key={tournament.id} className="w-full">
@@ -70,6 +87,12 @@ export default function Sudamericana({tournaments}) {
                                                         <div className="flex items-center gap-1 text-sm text-indigo-100">
                                                             <CalendarIcon className="w-4 h-4" />
                                                             <span>{formatDate(tournament.played_at)}</span>
+                                                            {tournament.version && (
+                                                                <>
+                                                                    <span className="mx-1">•</span>
+                                                                    <span className="uppercase">{tournament.version.replace('_', ' ')}</span>
+                                                                </>
+                                                            )}
                                                         </div>
                                                     </div>
                                                     <ChevronDownIcon
@@ -85,6 +108,48 @@ export default function Sudamericana({tournaments}) {
                                         </div>
                                     );
                                 })}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Filters Sidebar */}
+                    <div className="w-60 flex-shrink-0 sticky top-0 h-screen overflow-y-auto pr-6 pt-6">
+                        <div className="bg-white rounded-lg shadow p-4">
+                            <h3 className="font-bold text-gray-900 mb-3">Versions</h3>
+                            <div className="flex flex-col gap-2">
+                                <label className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded border-b border-gray-100 pb-3 mb-1">
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedVersions.length === versions.length && versions.length > 0}
+                                        onChange={() => {
+                                            if (selectedVersions.length === versions.length) {
+                                                setSelectedVersions([]);
+                                            } else {
+                                                setSelectedVersions(versions);
+                                            }
+                                        }}
+                                        className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                                    />
+                                    <span className="text-sm font-bold text-gray-900">
+                                        SELECT ALL
+                                    </span>
+                                </label>
+                                {versions.map(version => (
+                                    <label key={version} className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedVersions.includes(version)}
+                                            onChange={() => toggleVersion(version)}
+                                            className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                                        />
+                                        <span className="text-sm font-medium text-gray-700 uppercase">
+                                            {version.replace('_', ' ')}
+                                        </span>
+                                    </label>
+                                ))}
+                                {versions.length === 0 && (
+                                    <p className="text-sm text-gray-500 italic">No versions available</p>
+                                )}
                             </div>
                         </div>
                     </div>
