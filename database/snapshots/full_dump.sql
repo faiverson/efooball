@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict VD7HyNU7ONQMBU4LX1Ii38uTyLQsngq6T5AimOiSqaFMuhz8U8yOmZIR0cBvYMS
+\restrict ILX7kud9XzWbg24OIdjKb8Odfy5ugVxJTg3ZztWZQawggmz8JKWBLiE5TkEFEkN
 
 -- Dumped from database version 15.15 (Debian 15.15-1.pgdg13+1)
 -- Dumped by pg_dump version 15.15 (Ubuntu 15.15-1.pgdg22.04+1)
@@ -4369,58 +4369,58 @@ INSERT INTO public.single_games VALUES (607, 9, 4, 3, 0, '', 'home', 'efootball_
 --
 
 INSERT INTO public.tournaments VALUES (6, 'Libertadores 5th', '[532,533,534,535,536,537,538,539,540,541,542,543]', 'team', 'libertadores', 'pes_2019', '2019-03-26');
+INSERT INTO public.tournaments VALUES (48, 'Libertadores 35th', '[2555,2556,2557,2558,2559,2560,2561,2562,2563,2564,2565,2566]', 'team', 'libertadores', 'efootball_2024', '2023-09-12');
+INSERT INTO public.tournaments VALUES (11, 'Libertadores 10th', '[802,803,804,805,806,807,808,809,810,811]', 'team', 'libertadores', 'pes_2019', '2019-08-27');
+INSERT INTO public.tournaments VALUES (47, 'Libertadores 34th', '[2522,2523,2524,2525,2526,2527,2528,2529,2530,2531,2532,2533]', 'team', 'libertadores', 'efootball_2023', '2023-08-22');
+INSERT INTO public.tournaments VALUES (40, 'Sudamericana 12th', '[2091,2092,2093,2094,2095,2096]', 'team', 'sudamericana', 'efootball_2022', '2022-06-07');
+INSERT INTO public.tournaments VALUES (35, 'Sudamericana 10th', '[1680,1681,1682,1683,1684,1685]', 'team', 'sudamericana', 'pes_2021', '2021-05-18');
+INSERT INTO public.tournaments VALUES (1, 'Libertadores 1st', '[299,300,301,302,303,304,305,306,307,308]', 'team', 'libertadores', 'pes_2019', '2018-10-23');
+INSERT INTO public.tournaments VALUES (16, 'Libertadores 14th', '[907,908,909,910,911,912,913,914,915,916,917,918]', 'team', 'libertadores', 'pes_2020', '2019-10-09');
+INSERT INTO public.tournaments VALUES (20, 'Sudamericana 3rd', '[1297,1298,1299,1300,1301,1302]', 'team', 'sudamericana', 'pes_2020', '2020-09-02');
+INSERT INTO public.tournaments VALUES (7, 'Libertadores 6th', '[564,565,566,567,568,569,570,571,572,573,574,575]', 'team', 'libertadores', 'pes_2019', '2019-04-16');
+INSERT INTO public.tournaments VALUES (2, 'Sudamericana 1st', '[309,310,311,312,313,314]', 'team', 'sudamericana', 'pes_2019', '2018-10-23');
 INSERT INTO public.tournaments VALUES (25, 'Libertadores 20th', '[1442,1443,1444,1445,1446,1447,1448,1449,1450,1451,1452,1453]', 'team', 'libertadores', 'pes_2021', '2021-01-26');
 INSERT INTO public.tournaments VALUES (12, 'Libertadores 11th', '[812,813,814,815,816,817,818,819,820,821,822,823]', 'team', 'libertadores', 'pes_2019', '2019-08-28');
 INSERT INTO public.tournaments VALUES (29, 'Libertadores 22nd', '[1522,1523,1524,1525,1526,1527,1528,1529,1530,1531]', 'team', 'libertadores', 'pes_2021', '2021-03-02');
-INSERT INTO public.tournaments VALUES (1, 'Libertadores 1st', '[299,300,301,302,303,304,305,306,307,308]', 'team', 'libertadores', 'pes_2019', '2018-10-23');
+INSERT INTO public.tournaments VALUES (3, 'Libertadores 2nd', '[406,407,408,409,410,411,412,413,414,415,416,417]', 'team', 'libertadores', 'pes_2019', '2019-01-01');
 INSERT INTO public.tournaments VALUES (21, 'Libertadores 18th', '[1348,1349,1350,1351,1352,1353,1354,1355]', 'team', 'libertadores', 'pes_2021', '2020-12-02');
-INSERT INTO public.tournaments VALUES (17, 'Libertadores 15th', '[1052,1053,1054,1055,1056,1057,1058,1059,1060,1061,1062,1063]', 'team', 'libertadores', 'pes_2020', '2020-01-14');
-INSERT INTO public.tournaments VALUES (7, 'Libertadores 6th', '[564,565,566,567,568,569,570,571,572,573,574,575]', 'team', 'libertadores', 'pes_2019', '2019-04-16');
-INSERT INTO public.tournaments VALUES (2, 'Sudamericana 1st', '[309,310,311,312,313,314]', 'team', 'sudamericana', 'pes_2019', '2018-10-23');
 INSERT INTO public.tournaments VALUES (8, 'Libertadores 7th', '[670,671,672,673,674,675,676,677,678,679,680,681]', 'team', 'libertadores', 'pes_2019', '2019-06-11');
+INSERT INTO public.tournaments VALUES (17, 'Libertadores 15th', '[1052,1053,1054,1055,1056,1057,1058,1059,1060,1061,1062,1063]', 'team', 'libertadores', 'pes_2020', '2020-01-14');
 INSERT INTO public.tournaments VALUES (38, 'Libertadores 27th', '[2033,2034,2035,2036,2037,2038,2039,2040,2041,2042,2043,2044]', 'team', 'libertadores', 'fifa_2022', '2022-04-19');
 INSERT INTO public.tournaments VALUES (26, 'Sudamericana 6th', '[1454,1455,1456,1457,1458,1459]', 'team', 'sudamericana', 'pes_2021', '2021-01-26');
 INSERT INTO public.tournaments VALUES (13, 'Libertadores 12th', '[845,846,847,848,849,850,851,852,853,854,855,856]', 'team', 'libertadores', 'pes_2020', '2019-09-13');
-INSERT INTO public.tournaments VALUES (22, 'Sudamericana 4th', '[1356,1357,1358,1359,1360,1361]', 'team', 'sudamericana', 'pes_2021', '2020-12-02');
-INSERT INTO public.tournaments VALUES (3, 'Libertadores 2nd', '[406,407,408,409,410,411,412,413,414,415,416,417]', 'team', 'libertadores', 'pes_2019', '2019-01-01');
+INSERT INTO public.tournaments VALUES (4, 'Libertadores 3rd', '[427,428,429,430,431,432,433,434,435,436,437,438]', 'team', 'libertadores', 'pes_2019', '2019-01-11');
 INSERT INTO public.tournaments VALUES (33, 'Libertadores 24th', '[1653,1654,1655,1656,1657,1658,1659,1660,1661,1662,1663,1664]', 'team', 'libertadores', 'pes_2021', '2021-05-15');
-INSERT INTO public.tournaments VALUES (50, 'Libertadores 36th', '[2583,2584,2585,2586,2587,2588,2589,2590,2591,2592,2593,2594]', 'team', 'libertadores', 'efootball_2024', '2023-10-03');
+INSERT INTO public.tournaments VALUES (22, 'Sudamericana 4th', '[1356,1357,1358,1359,1360,1361]', 'team', 'sudamericana', 'pes_2021', '2020-12-02');
 INSERT INTO public.tournaments VALUES (9, 'Libertadores 8th', '[744,745,746,747,748,749,750,751,752,753,754,755]', 'team', 'libertadores', 'pes_2019', '2019-07-23');
 INSERT INTO public.tournaments VALUES (30, 'Sudamericana 8th', '[1532,1533,1534,1535,1536,1537]', 'team', 'sudamericana', 'pes_2021', '2021-03-02');
+INSERT INTO public.tournaments VALUES (45, 'Sudamericana 13th', '[2371,2372,2373,2374,2375,2376]', 'team', 'sudamericana', 'efootball_2023', '2023-01-10');
 INSERT INTO public.tournaments VALUES (18, 'Libertadores 16th', '[1185,1186,1187,1188,1189,1190,1191,1192,1193,1194,1195,1196]', 'team', 'libertadores', 'pes_2020', '2020-06-30');
-INSERT INTO public.tournaments VALUES (46, 'Libertadores 33rd', '[2414,2415,2416,2417,2418,2419,2420,2421,2422,2423,2424,2425]', 'team', 'libertadores', 'efootball_2023', '2023-04-11');
-INSERT INTO public.tournaments VALUES (36, 'Libertadores 26th', '[1790,1791,1792,1793,1794,1795,1796,1797]', 'team', 'libertadores', 'pes_2021', '2021-08-24');
-INSERT INTO public.tournaments VALUES (4, 'Libertadores 3rd', '[427,428,429,430,431,432,433,434,435,436,437,438]', 'team', 'libertadores', 'pes_2019', '2019-01-11');
-INSERT INTO public.tournaments VALUES (14, 'Libertadores 13th', '[857,858,859,860,861,862,863,864,865,866,867,868]', 'team', 'libertadores', 'pes_2020', '2019-09-14');
-INSERT INTO public.tournaments VALUES (23, 'Libertadores 19th', '[1373,1374,1375,1376,1377,1378,1379,1380,1381,1382]', 'team', 'libertadores', 'pes_2021', '2020-12-08');
-INSERT INTO public.tournaments VALUES (10, 'Libertadores 9th', '[760,761,762,763,764,765,766,767,768,769,770,771]', 'team', 'libertadores', 'pes_2019', '2019-07-30');
-INSERT INTO public.tournaments VALUES (43, 'Libertadores 31st', '[2186,2187,2188,2189,2190,2191,2192,2193,2194,2195,2196,2197]', 'team', 'libertadores', 'efootball_2022', '2022-08-23');
-INSERT INTO public.tournaments VALUES (15, 'Sudamericana 2nd', '[869,870,871,872,873,874]', 'team', 'sudamericana', 'pes_2020', '2019-09-14');
 INSERT INTO public.tournaments VALUES (5, 'Libertadores 4th', '[439,440,441,442,443,444,445,446,447,448,449,450]', 'team', 'libertadores', 'pes_2019', '2019-01-12');
+INSERT INTO public.tournaments VALUES (14, 'Libertadores 13th', '[857,858,859,860,861,862,863,864,865,866,867,868]', 'team', 'libertadores', 'pes_2020', '2019-09-14');
+INSERT INTO public.tournaments VALUES (36, 'Libertadores 26th', '[1790,1791,1792,1793,1794,1795,1796,1797]', 'team', 'libertadores', 'pes_2021', '2021-08-24');
+INSERT INTO public.tournaments VALUES (10, 'Libertadores 9th', '[760,761,762,763,764,765,766,767,768,769,770,771]', 'team', 'libertadores', 'pes_2019', '2019-07-30');
+INSERT INTO public.tournaments VALUES (49, 'Sudamericana 14th', '[2567,2568,2569,2570,2571,2572]', 'team', 'sudamericana', 'efootball_2024', '2023-09-19');
+INSERT INTO public.tournaments VALUES (46, 'Libertadores 33rd', '[2414,2415,2416,2417,2418,2419,2420,2421,2422,2423,2424,2425]', 'team', 'libertadores', 'efootball_2023', '2023-04-11');
+INSERT INTO public.tournaments VALUES (23, 'Libertadores 19th', '[1373,1374,1375,1376,1377,1378,1379,1380,1381,1382]', 'team', 'libertadores', 'pes_2021', '2020-12-08');
+INSERT INTO public.tournaments VALUES (15, 'Sudamericana 2nd', '[869,870,871,872,873,874]', 'team', 'sudamericana', 'pes_2020', '2019-09-14');
 INSERT INTO public.tournaments VALUES (27, 'Libertadores 21st', '[1477,1478,1479,1480,1481,1482,1483,1484,1485,1486,1487,1488]', 'team', 'libertadores', 'pes_2021', '2021-02-09');
-INSERT INTO public.tournaments VALUES (42, 'Libertadores 30th', '[2173,2174,2175,2176,2177,2178,2179,2180,2181,2182,2183,2184]', 'team', 'libertadores', 'efootball_2022', '2022-08-16');
-INSERT INTO public.tournaments VALUES (19, 'Libertadores 17th', '[1285,1286,1287,1288,1289,1290,1291,1292,1293,1294,1295,1296]', 'team', 'libertadores', 'pes_2020', '2020-09-02');
-INSERT INTO public.tournaments VALUES (11, 'Libertadores 10th', '[802,803,804,805,806,807,808,809,810,811]', 'team', 'libertadores', 'pes_2019', '2019-08-27');
-INSERT INTO public.tournaments VALUES (24, 'Sudamericana 5th', '[1383,1384,1385,1386,1387,1388]', 'team', 'sudamericana', 'pes_2021', '2020-12-08');
 INSERT INTO public.tournaments VALUES (31, 'Libertadores 23rd', '[1639,1640,1641,1642,1643,1644,1645,1646]', 'team', 'libertadores', 'pes_2021', '2021-05-11');
-INSERT INTO public.tournaments VALUES (16, 'Libertadores 14th', '[907,908,909,910,911,912,913,914,915,916,917,918]', 'team', 'libertadores', 'pes_2020', '2019-10-09');
-INSERT INTO public.tournaments VALUES (20, 'Sudamericana 3rd', '[1297,1298,1299,1300,1301,1302]', 'team', 'sudamericana', 'pes_2020', '2020-09-02');
-INSERT INTO public.tournaments VALUES (37, 'Sudamericana 11th', '[1798,1799,1800,1801,1802,1803]', 'team', 'sudamericana', 'pes_2021', '2021-08-24');
+INSERT INTO public.tournaments VALUES (19, 'Libertadores 17th', '[1285,1286,1287,1288,1289,1290,1291,1292,1293,1294,1295,1296]', 'team', 'libertadores', 'pes_2020', '2020-09-02');
+INSERT INTO public.tournaments VALUES (24, 'Sudamericana 5th', '[1383,1384,1385,1386,1387,1388]', 'team', 'sudamericana', 'pes_2021', '2020-12-08');
+INSERT INTO public.tournaments VALUES (43, 'Libertadores 31st', '[2186,2187,2188,2189,2190,2191,2192,2193,2194,2195,2196,2197]', 'team', 'libertadores', 'efootball_2022', '2022-08-23');
 INSERT INTO public.tournaments VALUES (28, 'Sudamericana 7th', '[1489,1490,1491,1492,1493,1494]', 'team', 'sudamericana', 'pes_2021', '2021-02-09');
+INSERT INTO public.tournaments VALUES (37, 'Sudamericana 11th', '[1798,1799,1800,1801,1802,1803]', 'team', 'sudamericana', 'pes_2021', '2021-08-24');
 INSERT INTO public.tournaments VALUES (34, 'Libertadores 25th', '[1668,1669,1670,1671,1672,1673,1674,1675,1676,1677,1678,1679]', 'team', 'libertadores', 'pes_2021', '2021-05-18');
 INSERT INTO public.tournaments VALUES (32, 'Sudamericana 9th', '[1647,1648,1649,1650,1651,1652]', 'team', 'sudamericana', 'pes_2021', '2021-05-11');
 INSERT INTO public.tournaments VALUES (39, 'Libertadores 28th', '[2083,2084,2085,2086,2087,2088,2089,2090]', 'team', 'libertadores', 'efootball_2022', '2022-06-07');
+INSERT INTO public.tournaments VALUES (42, 'Libertadores 30th', '[2173,2174,2175,2176,2177,2178,2179,2180,2181,2182,2183,2184]', 'team', 'libertadores', 'efootball_2022', '2022-08-16');
 INSERT INTO public.tournaments VALUES (44, 'Libertadores 32nd', '[2359,2360,2361,2362,2363,2364,2365,2366,2367,2368,2369,2370]', 'team', 'libertadores', 'efootball_2023', '2023-01-10');
 INSERT INTO public.tournaments VALUES (41, 'Libertadores 29th', '[2142,2143,2144,2145,2146,2147,2148,2149,2150,2151,2152,2153]', 'team', 'libertadores', 'efootball_2022', '2022-07-26');
-INSERT INTO public.tournaments VALUES (35, 'Sudamericana 10th', '[1680,1681,1682,1683,1684,1685]', 'team', 'sudamericana', 'pes_2021', '2021-05-18');
-INSERT INTO public.tournaments VALUES (40, 'Sudamericana 12th', '[2091,2092,2093,2094,2095,2096]', 'team', 'sudamericana', 'efootball_2022', '2022-06-07');
-INSERT INTO public.tournaments VALUES (48, 'Libertadores 35th', '[2555,2556,2557,2558,2559,2560,2561,2562,2563,2564,2565,2566]', 'team', 'libertadores', 'efootball_2024', '2023-09-12');
-INSERT INTO public.tournaments VALUES (47, 'Libertadores 34th', '[2522,2523,2524,2525,2526,2527,2528,2529,2530,2531,2532,2533]', 'team', 'libertadores', 'efootball_2023', '2023-08-22');
-INSERT INTO public.tournaments VALUES (49, 'Sudamericana 14th', '[2567,2568,2569,2570,2571,2572]', 'team', 'sudamericana', 'efootball_2024', '2023-09-19');
-INSERT INTO public.tournaments VALUES (45, 'Sudamericana 13th', '[2371,2372,2373,2374,2375,2376]', 'team', 'sudamericana', 'efootball_2023', '2023-01-10');
-INSERT INTO public.tournaments VALUES (52, 'Libertadores 37th', '[2729,2730,2731,2732,2733,2734,2735,2736,2737,2738,2739,2740]', 'team', 'libertadores', 'efootball_2024', '2024-02-20');
 INSERT INTO public.tournaments VALUES (51, 'Sudamericana 15th', '[2595,2596,2597,2598,2599,2600]', 'team', 'sudamericana', 'efootball_2024', '2023-10-03');
+INSERT INTO public.tournaments VALUES (50, 'Libertadores 36th', '[2583,2584,2585,2586,2587,2588,2589,2590,2591,2592,2593,2594]', 'team', 'libertadores', 'efootball_2024', '2023-10-03');
 INSERT INTO public.tournaments VALUES (53, 'Sudamericana 16th', '[2741,2742,2743,2744,2745]', 'team', 'sudamericana', 'efootball_2024', '2024-02-20');
+INSERT INTO public.tournaments VALUES (52, 'Libertadores 37th', '[2729,2730,2731,2732,2733,2734,2735,2736,2737,2738,2739,2740]', 'team', 'libertadores', 'efootball_2024', '2024-02-20');
 INSERT INTO public.tournaments VALUES (54, 'Libertadores 38th', '[2746,2747,2748,2749,2750,2751,2752,2753,2754,2755,2756,2757]', 'team', 'libertadores', 'efootball_2024', '2024-02-27');
 INSERT INTO public.tournaments VALUES (55, 'Sudamericana 17th', '[2758,2759,2760,2761,2762,2763]', 'team', 'sudamericana', 'efootball_2024', '2024-02-27');
 INSERT INTO public.tournaments VALUES (56, 'Libertadores 39th', '[2782,2783,2784,2785,2786,2787,2788,2789,2790,2791,2792,2793]', 'team', 'libertadores', 'efootball_2024', '2024-03-19');
@@ -4536,5 +4536,5 @@ SELECT pg_catalog.setval('public.users_id_seq', 1, false);
 -- PostgreSQL database dump complete
 --
 
-\unrestrict VD7HyNU7ONQMBU4LX1Ii38uTyLQsngq6T5AimOiSqaFMuhz8U8yOmZIR0cBvYMS
+\unrestrict ILX7kud9XzWbg24OIdjKb8Odfy5ugVxJTg3ZztWZQawggmz8JKWBLiE5TkEFEkN
 
