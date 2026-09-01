@@ -10,6 +10,7 @@ export const GameVersion = {
   'FIFA_2024': 'fifa_2024',
   'EFOOTBALL_v4': 'efootball_v4',
   'EFOOTBALL_v5': 'efootball_v5',
+  'EFOOTBALL_v6': 'efootball_v6',
 };
 
 export const TournamentType = {
